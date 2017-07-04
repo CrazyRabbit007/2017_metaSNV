@@ -1,0 +1,162 @@
+#! /bin/bash
+#########################################
+#  metaSNP Step II:   `SNP calling`     #
+#########################################
+#
+# Helper script to set up the metaSNP caller
+# -- The script will generate either one or several commandline jobs (parallelization)
+# -- each job has to be run in order to compute SNPs for the entire population
+#
+# This code is part of the metagenomic SNP calling pipeline (metaSNP)
+# Copyright (c) 2016 Robin Munch
+# Licenced under the GNU General Public License (see LICENSE) 
+
+# Abort on any errors
+set -e
+
+# Variables
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_DIR="$1"
+SAMPLES="$2"
+REF_DB="$3"
+# Optional
+SPLITS=""
+DB_ANNO=""
+DEBUG=0
+
+display_usage() {
+    echo >&2 ""
+    echo >&2 "	Usage: $(basename $0) project_dir/ all_samples ref_db [options]"
+    echo >&2 ""
+    echo >&2 "Parameters (positional):"
+    echo >&2 " Required:"
+    echo >&2 "	project_dir	DIR	= the project directory."
+    echo >&2 "	all_samples	FILE	= list of bam files, one file per line."
+    echo >&2 "	ref_db   	FILE	= reference multi-sequence FASTA file used for the alignments."
+	echo >&2 ""
+	echo >&2 " Optional:"
+	echo >&2 "	-a db_ann	FILE	= database annotation."
+    echo >&2 "	-l splits/	DIR	= genome splits DIR for job parallelization (pre-processing)." 
+    echo >&2 ""
+	echo >&2 "Note: Alternatively, use the '-l splits' option to call SNPs for specific species, contig regions (BED) or single positions (contig_id pos). Unlisted contigs/pos are skipped."
+	echo >&2 ""
+}
+
+required_parameter() {
+        echo >&2 ""
+        echo >&2 "ERROR: '$1' is a required parameter"
+        display_usage
+        exit 1
+}
+
+dir_missing() {
+        echo >&2 ""
+        echo >&2 "ERROR: '$1' no such file or directory"
+        display_usage
+        exit 1
+}
+
+db_missing() {
+        echo >&2 ""
+        echo >&2 "ERROR:	No reference database or annotation file found!"
+        echo >&2 "ERROR:	'$1' is not a file."
+		echo >&2 "SOLUTION: run getRefDB.sh or set up a custom database before running metaSNP caller"
+        display_usage
+        exit 1
+}
+
+make_dir() {
+        echo >&2 ""
+	echo >&2 "WARNING '$1' is not an initialized metaSNP project. Subdirectory '$(basename $2)' (output DIR) is missing."
+	echo >&2 "RUN:"
+	echo >&2 "	mkdir $2"
+	echo >&2 ""
+	echo >&2 "Then rerun '$0 $ARGA'"
+	echo >&2 ""
+#	display_usage 
+#	mkdir $OUT_DIR
+	exit 1
+}
+
+# Parse args using getopt (instead of getopts) to allow arguments before options
+ARGA=$@
+ARGS=$(getopt -o l:a:d:h -n "$0" -- "$@")
+# reorganize arguments as returned by getopt
+eval set -- "$ARGS"
+
+while true; do
+    case "$1" in
+        # Shift before to throw away option
+        # Shift after if option has a required positional argument
+        -l)
+            shift
+            SPLITS="$1/"
+			[ -d "$SPLITS" ] || dir_missing "$SPLITS"
+			best_splt=$(find $SPLITS -name "best_split_*")
+			best_splt="$best_splt"
+            shift
+            ;;
+        -a)
+            shift
+            DB_ANNO="$1"
+			[ -f "$DB_ANNO" ] || db_missing "$DB_ANNO"
+			DB_ANNO="-g $DB_ANNO"
+            shift
+            ;;
+        -d)
+            shift
+            DEBUG="$1"
+            shift
+            ;;
+        -h)
+            shift
+            display_usage
+            exit 1
+            ;;
+
+        --)
+            shift
+            break
+            ;;
+    esac
+done
+
+# Check Files
+# Required:
+[ -n "$PROJECT_DIR" ] || required_parameter "project_dir/"
+[ -d "$PROJECT_DIR" ] || dir_missing "$PROJECT_DIR"
+
+[ -d "$PROJECT_DIR/snpCaller" ] || make_dir "$PROJECT_DIR" "$PROJECT_DIR/snpCaller"
+
+[ -n "$SAMPLES" ] || required_parameter "all_samples"
+[ -f "$SAMPLES" ] || dir_missing "$SAMPLES"
+
+[ -n "$REF_DB" ] || required_parameter "ref_db"
+[ -f "$REF_DB" ] || db_missing "$REF_DB"
+REF_DB="-f $REF_DB"
+
+# SNP-CALLER + I/O FILES
+snpCaller="$DIR/src/snpCaller/snpCall"
+indiv_out=$PROJECT_DIR"/snpCaller/indiv_called"
+called_SP=$PROJECT_DIR"/snpCaller/called_SNPs"
+
+## ACTUAL COMMANDLINE
+# 	Note: Due to a bug in samtools v0.1.18, -Q 20 might be erroneous to use.
+#	Note: Different phred score scales might be disregarded.
+#	Note: If samtools > v0.1.18 is used -Q 20 filtering is highly recommended.
+
+# Generate Commandline(s)
+if [ "$SPLITS" ]
+	then	
+	# Job parallelization (one command-line per split) 
+		for split in $best_splt;
+    		do  
+        		echo "samtools mpileup -l $split $REF_DB -B -b $SAMPLES | $snpCaller $REF_DB $DB_ANNO -i $indiv_out.$(echo $split | rev | cut -f1 -d/ | rev) > $called_SP.${split##*/}"
+    		done
+
+	else
+	# Single batch jobs	
+		echo "samtools mpileup $REF_DB -B -b $SAMPLES | $snpCaller $REF_DB $DB_ANNO -i $indiv_out > $called_SP"
+fi
+
+exit

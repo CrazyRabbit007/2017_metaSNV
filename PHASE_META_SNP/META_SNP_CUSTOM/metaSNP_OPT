@@ -1,0 +1,192 @@
+#!/bin/bash
+#########################################
+#  metaSNP Step II: `Genome Splitting`  #
+#########################################
+#
+# Helper script
+
+# This code is part of the metagenomic SNP calling pipeline (metaSNP)
+# Copyright (c) 2016 Robin Munch
+# Licenced under the GNU General Public License (see LICENSE)
+
+
+# Abort on any errors
+set -e 
+
+# Variables
+wd=`pwd`
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+arg1="$1"
+arg2="$2"
+arg3="$3"
+
+PROJECT_DIR=$arg1
+GENOME_DEF=$arg2
+NUM_SPLITS=10
+SPLIT_LIMIT=100
+COV_FILES=$PROJECT_DIR"/cov"
+
+date=$(date +%Y-%m-%d)
+
+#Usage Messages
+display_usage() {
+	echo >&2 ""
+	echo >&2 ""
+	echo >&2 "Usage: $(basename $0) project_dir/ genome_def nr_splits[int]"
+	echo >&2 ""
+	echo >&2 "Parameters"
+    echo >&2 " Required:"
+	echo >&2 "	project_dir/    = the metaSNP project directory"
+	echo >&2 "	genome_def FILE    = Contig ranges in BED format. (Fields: Contig_id, contigStart, contigEnd)"
+    echo >&2 ""
+	echo >&2 " Optional:"
+	echo >&2 "	nr_splits INT	= INT for job parallelization (range: 1-100) [10]"
+	echo >&2 ""
+    echo >&2 "Note: Expecting 'metaSNP_COV' to be completed!" 
+    echo >&2 ""
+}
+
+required_parameter() {
+        echo >&2 ""
+        echo >&2 "ERROR: '$1' is a required argument"
+        display_usage
+        exit 1
+}
+
+no_such_file() {
+        echo >&2 ""
+        echo >&2 "ERROR: '$1' no such file or directory"
+        display_usage
+        exit 1
+}
+
+split_limit() {
+        echo >&2 ""
+        echo >&2 "ERROR: nr_splits[$1] exceeds the limit of 100"
+		echo >&2 ""
+        display_usage
+        exit 1
+}
+
+missing_input_dir() {
+        echo >&2 ""
+        echo >&2 "ERROR: '$1' missing in the project directory '$2'"
+        echo >&2 "ERROR: '$1' contains the input files (metaSNP_COV output)"
+        echo >&2 "SUGGESTION: Double check if '$2' is the intended project directory, or"
+#        echo >&2 "SUGGESTION: At this point the directory should have the coverage files in '$1'"
+        echo >&2 "SOLUTION: Initialize a new project (metaSNP_NEW) and rerun the coverage estimation (metaSNP_COV)."
+        echo >&2 "" 
+        exit 1
+}
+
+rerun_cov() {
+        echo >&2 ""
+        echo >&2 "ERROR: Requires coverage estimations. Run 'metaSNP_COV' first" 
+        echo >&2 ""
+        exit 1
+}
+
+make_dir() {
+        echo >&2 ""
+	echo >&2 "WARNING '$1' is not an initialized metaSNP project. Subdirectory '$(basename $2)' (output DIR) is missing."
+	echo >&2 "WARNING: If you used '$1' for the coverage estimation (metaSNP_COV) RUN:"
+	echo >&2 ""
+	echo >&2 "	mkdir $2"
+	echo >&2 ""
+	echo >&2 "SUGGESTION: Double check if '$1' has the correct cov/ folder!"
+	echo >&2 ""
+#	display_usage 
+#	mkdir $OUT_DIR
+	exit 1
+}
+
+
+# getopt to use -h flag
+ARGS=$(getopt -o h -n "$0" -- "$@")
+# reorganize arguments as returned by getopt
+eval set -- "$ARGS"
+
+while true; do
+    case "$1" in
+        # Shift before to throw away option
+        # Shift after if option has a required positional argument
+        -h)
+            shift
+            display_usage
+            exit 1
+            ;;
+        --)
+            shift
+            break
+            ;;
+    esac
+done
+
+## Test 
+# 	Required parameters:
+[ -z "$arg1" ] && required_parameter "project_dir"
+[ -z "$arg2" ] && required_parameter "genome_def"
+[ -n "$arg3" ] && NUM_SPLITS=$arg3
+
+#	Nr_Splits
+[ "$NUM_SPLITS" -gt $SPLIT_LIMIT ] && split_limit $NUM_SPLITS
+
+#	Required files and directories
+[ -d "$PROJECT_DIR" ] || no_such_file "$PROJECT_DIR"
+[ -d "$COV_FILES" ] || missing_input_dir "$COV_FILES" "$PROJECT_DIR"
+[ -f "$GENOME_DEF" ] || no_such_file "$GENOME_DEF"
+
+# 	Required output DIR
+[ -d "$PROJECT_DIR/bestsplits/" ] || make_dir "$PROJECT_DIR" "$PROJECT_DIR/bestsplits/"
+
+# 	Get project name
+#PROJECT_NAME=$(echo $PROJECT_DIR | awk -F"/" '{print $(NF-1)}')
+PROJECT_NAME=$(basename $PROJECT_DIR)
+
+
+# Get a summary for the coverage computation (Step I) from the .cov and .detail files
+# List of coverage files for all samples
+cd $COV_FILES
+[ "$(ls *.cov)" ] || rerun_cov
+allFile=$(ls *.cov)
+
+for file in $allFile
+do
+ 	echo $file
+	python $DIR/src/computeGenomeCoverage.py $file $file.detail $file.summary
+done
+
+echo -e "\nCoverage summary here: $PROJECT_DIR"
+echo "	Average vertical genome coverage: '$PROJECT_DIR$PROJECT_NAME.all_cov.tab'"
+echo "	Horizontal genome coverage (1X): '$PROJECT_DIR$PROJECT_NAME.all_perc.tab'"
+ls *.summary | xargs awk -f $DIR/src/collapse_AvgCov.awk > ../$PROJECT_NAME.all_cov.tab
+ls *.summary | xargs awk -f $DIR/src/collapse_PercCov.awk > ../$PROJECT_NAME.all_perc.tab
+
+cd $wd
+
+## DATABASE INDEXING - (Genome Splitting)
+
+# Parameters:
+cov="$PROJECT_DIR/$PROJECT_NAME.all_cov.tab"
+perc="$PROJECT_DIR/$PROJECT_NAME.all_perc.tab"
+genDef=$GENOME_DEF
+outFile=$PROJECT_DIR"/bestsplits/best_split"
+nr=$NUM_SPLITS
+
+# Clear bestplits directory
+echo -e >&2 "\nremoving old splits in:"
+echo -e >&2 $PROJECT_DIR"/bestsplits/*"
+remove=$PROJECT_DIR"/bestsplits/*"
+#echo $remove
+rm -rf $remove
+
+echo -e >&2 "\nGenome Splitting:"
+# usage createOptimumSplit.sh <all_cov.tab> <all_perc.tab> <geneDefinitions> <INT_NrSplits> <.outfile>
+python $DIR/src/createOptimumSplit.py $cov $perc $genDef $nr $outFile
+
+# Remove second Row - CAUTION: change in filtering.py as well
+#awk '!(NR == 2)' $PROJECT_DIR$PROJECT_NAME.all_cov.tab > temp
+#mv temp  $PROJECT_DIR$PROJECT_NAME.all_cov.tab
+#awk '!(NR == 2)' $PROJECT_DIR$PROJECT_NAME.all_perc.tab > temp
+#mv temp  $PROJECT_DIR$PROJECT_NAME.all_perc.tab
+exit

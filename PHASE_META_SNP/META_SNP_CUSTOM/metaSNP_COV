@@ -1,0 +1,87 @@
+#!/bin/bash
+
+display_usage() { 
+	echo >&2 ""
+	echo >&2 "	Usage: $(basename $0) project_dir/ all_samples"
+	echo >&2 ""
+	echo >&2 "Parameters:"
+	echo >&2 "  Required:"
+	echo >&2 "	project_dir/	DIR	A metaSNP initialized project directory (metaSNP_NEW)"
+	echo >&2 "	all_samples	FILE	Input list of bam files, one file per line."
+	echo >&2 ""
+} 
+
+missing() {
+        echo >&2 ""
+        echo >&2 "ERROR: '$1' no such file or directory"
+        display_usage
+        exit 1
+}
+
+make_dir() {
+        echo >&2 ""
+		echo >&2 "ERROR: '$1' is not a metaSNP project. Subdirectory '$2' is missing."
+	echo >&2 ""
+        echo >&2 "Please initialize a new metaSNP project first!"
+	echo >&2 ""
+	echo >&2 "	RUN: metaSNP_NEW projectName"
+	echo >&2 "or"	
+	echo >&2 "	RUN: mkdir $2"
+	echo >&2 ""
+#	display_usage 
+#	mkdir $OUT_DIR
+	exit 1
+}
+
+
+# print error message if no argument is supplied
+if [  $# -ne 2  ] 
+then 
+	display_usage
+	exit 1
+fi
+
+# assign arguments to variables
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+all_samples="$2"
+PROJECT_DIR="$1"
+OUT_DIR="$PROJECT_DIR/cov"
+
+# getopt to use -h flag
+ARGS=$(getopt -o h -n "$0" -- "$@")
+# reorganize arguments as returned by getopt
+eval set -- "$ARGS"
+
+while true; do
+    case "$1" in
+        # Shift before to throw away option
+        # Shift after if option has a required positional argument
+        -h)
+            shift
+            display_usage
+            exit 1
+            ;;
+        --)
+            shift
+            break
+            ;;
+    esac
+done
+
+## Control
+[ -d "$PROJECT_DIR" ] || missing "$PROJECT_DIR"
+[ -f "$all_samples" ] || missing "$all_samples"
+
+# Check required output directories
+[ -d "$OUT_DIR" ] || make_dir "$PROJECT_DIR" "$OUT_DIR"
+
+## Generate command lines
+while read file
+do
+#    name=$(echo $file | awk -F"/" '{split($NF,a,"."); print a[1]}')
+#    name=$(echo $file | awk -F"/" '{split($NF,a,"/"); print a[1]}')
+	name=$(basename $file)
+    echo $DIR/src/qaTools/qaCompute -c 10 -d -i $file $OUT_DIR/$name.cov
+
+done < $all_samples
+exit
