@@ -31,7 +31,7 @@ GENE_CLEAN=/path/db/annotations
 ### Run the two first steps of metaSNV :
 
 - **Coverage estimation :**
-````bash
+````sh
 metaSNV.py "${OUT}" "${SAMPLES}" "${FASTA}" --threads 8 --n_splits 40 --db_ann "${GENE_CLEAN}" --print-commands > cov.jobs
 ````
 Submit the command lines :
