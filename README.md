@@ -11,6 +11,12 @@ This project relies on metaSNV :
 2. **metaSNV** : metaSNV code
 3. **ANALYSIS**, **DATA**, **RESULTS** : Scripts under work, data to test the and their output
 4. **metaSNV_*.py** : Polished and working scripts, to use after the two first steps of the original metaSNV
+..* metaSNV_filtering.py : Filtering step
+..* metaSNV_join.py : Join datasets (needed when working both on MetaG and MetaT)
+..* metaSNV_universal.py : Extract universal genes
+..* metaSNV_stats.py : Computes descriptive statistics
+..* metaSNV_DistDiv.py : Computes pairwise distances, diversity and FST
+..* metaSNV_pnps.py : Computes pnps per genome and per gene
 
 ## Tutorial ([Original metaSNV tutorial](http://metasnv.embl.de/tutorial.html))
 
@@ -29,19 +35,51 @@ GENE_CLEAN=/path/db/annotations
 metaSNV.py "${OUT}" "${SAMPLES}" "${FASTA}" --threads 8 --n_splits 40 --db_ann "${GENE_CLEAN}" --print-commands > cov.jobs
 ````
 Submit the command lines :
-````sh
+````bash
 jnum=$(grep -c "." cov.jobs) # Store the number of jobs
 /nfs/home/ssunagaw/bork.bin/job.creator.pl 1 cov.jobs # Create a file per job
 qsub -sync y -V -t 1-$jnum -pe smp 1 /nfs/home/ssunagaw/bork.bin/run.array.sh # Submit the array 
 ````
 
 - **Variant calling :**
-````
+````bash
 metaSNV.py "${OUT}" "${SAMPLES}" "${FASTA}" --threads 8 --n_splits 40 --db_ann "${GENE_CLEAN}" --print-commands | grep 'samtools mpileup' > snp.jobs
 ````
 Submit the command lines :
-````
+````bash
 jnum=$(grep -c "." snp.jobs) # Store the number of jobs
 /nfs/home/ssunagaw/bork.bin/job.creator.pl 1 snp.jobs # Create a file per job
 qsub -sync y -V -t 1-$jnum -pe smp 1 /nfs/home/ssunagaw/bork.bin/run.array.sh # Submit the array
 ````
+
+### Filtering :
+````bash
+python metaSNV_filtering.py --help
+````
+
+### [Optional] Joining datasets :
+When working on MetaG and MetaT
+````bash
+python metaSNV_join.py --help
+````
+
+### [Optional] Extract universal genes only :
+````bash
+python metaSNV_universal.py --help
+````
+
+### Compute descriptive statistics :
+````bash
+python metaSNV_stats.py --help
+````
+
+### Distance computation :
+````bash
+python metaSNV_DistDiv.py --help
+````
+
+### Compute pnps values :
+````bash
+python metaSNV_pnps.py --help
+````
+
