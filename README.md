@@ -9,7 +9,7 @@ This project relies on metaSNV :
 
 1. **PHASE_META_SNP** : Archive of the first software draft (early 2017)
 2. **metaSNV** : metaSNV code
-3. **ANALYSIS**, **DATA**, **RESULTS** : Scripts under work, data to test the and their output
+3. **ANALYSIS**, **DATA**, **RESULTS** : Scripts under work, data to test them and their output
 4. **metaSNV_*.py** : Polished and working scripts, to use after the two first steps of the original metaSNV
     - metaSNV_filtering.py : Filtering step
     - metaSNV_join.py : Join datasets (needed when working both on MetaG and MetaT)
