@@ -21,12 +21,12 @@ This project relies on metaSNV :
 ## Tutorial ([Original metaSNV tutorial](http://metasnv.embl.de/tutorial.html))
 
 - **Variables :**
-```bash
+````bash
 OUT=/project/directory/
 SAMPLES=/path/bamfiles_names_list
 FASTA=/path/db/database.fasta
 GENE_CLEAN=/path/db/annotations
-```
+````
 
 ### Run the two first steps of metaSNV :
 
