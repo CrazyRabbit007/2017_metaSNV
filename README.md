@@ -6,6 +6,7 @@
 - [GitLab](https://git.embl.de/costea/metaSNV) : Check for latest update of the core code. Last checked on 2017-07-05. 
 
 **Purpose :**
+
 Identify variable genomic positions from aligned metagenomic data (bamfiles), describe the populations (samples) and compute genetic distances between said populations.
 
 **Input :**
@@ -14,7 +15,7 @@ Identify variable genomic positions from aligned metagenomic data (bamfiles), de
     - Reference genomes (fasta)
     - Gene annotations (bed)
 
-## Structure of the project
+## Structure of the repository
 
 1. **PHASE_META_SNP** : Archive of the first software draft (early 2017)
 2. **metaSNV** : metaSNV code
