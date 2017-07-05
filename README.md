@@ -44,6 +44,7 @@ qsub -sync y -V -t 1-$jnum -pe smp 1 /nfs/home/ssunagaw/bork.bin/run.array.sh # 
 ````
 
 - **Variant calling :**
+
 ````bash
 metaSNV.py "${OUT}" "${SAMPLES}" "${FASTA}" --threads 8 --n_splits 40 --db_ann "${GENE_CLEAN}" --print-commands | grep 'samtools mpileup' > snp.jobs
 ````
