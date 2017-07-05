@@ -17,7 +17,7 @@ This project relies on metaSNV :
 ### Run the two first steps of metaSNV :
 
 - **Variables :**
-````
+````bash
 OUT=/project/directory/
 SAMPLES=/path/bamfiles_names_list
 FASTA=/path/db/database.fasta
@@ -25,11 +25,11 @@ GENE_CLEAN=/path/db/annotations
 ````
 
 - **Coverage estimation :**
-````
+````bash
 metaSNV.py "${OUT}" "${SAMPLES}" "${FASTA}" --threads 8 --n_splits 40 --db_ann "${GENE_CLEAN}" --print-commands > cov.jobs
 ````
 Submit the command lines :
-````
+````sh
 jnum=$(grep -c "." cov.jobs) # Store the number of jobs
 /nfs/home/ssunagaw/bork.bin/job.creator.pl 1 cov.jobs # Create a file per job
 qsub -sync y -V -t 1-$jnum -pe smp 1 /nfs/home/ssunagaw/bork.bin/run.array.sh # Submit the array 
