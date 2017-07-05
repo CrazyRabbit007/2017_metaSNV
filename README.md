@@ -1,9 +1,18 @@
 # metaSNV-LP : In-house custom version under development
 
-This project relies on metaSNV :
+**This project relies on metaSNV :**
 - Paper : Under revision
 - [Compagnon website](http://metasnv.embl.de/index.html)
 - [GitLab](https://git.embl.de/costea/metaSNV) : Check for latest update of the core code. Last checked on 2017-07-05. 
+
+**Purpose :**
+Identify variable genomic positions from aligned metagenomic data (bamfiles), describe the populations (samples) and compute genetic distances between said populations.
+
+**Input :**
+- Bamfiles
+- Database
+    - Reference genomes (fasta)
+    - Gene annotations (bed)
 
 ## Structure of the project
 
