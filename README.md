@@ -29,7 +29,7 @@ FASTA=/path/db/database.fasta
 GENE_CLEAN=/path/db/annotations
 `````
 
-### Run the two first steps of metaSNV :
+### 1. Run the two first steps of metaSNV :
 
 - **Coverage estimation :**
 
@@ -55,33 +55,33 @@ jnum=$(grep -c "." snp.jobs) # Store the number of jobs
 qsub -sync y -V -t 1-$jnum -pe smp 1 /nfs/home/ssunagaw/bork.bin/run.array.sh # Submit the array
 ````
 
-### Filtering :
+### 2. Filtering :
 ````bash
 python metaSNV_filtering.py --help
 ````
 
-### [Optional] Joining datasets :
+### 3. [Optional] Joining datasets :
 When working on MetaG and MetaT
 ````bash
 python metaSNV_join.py --help
 ````
 
-### [Optional] Extract universal genes only :
+### 4. [Optional] Extract universal genes only :
 ````bash
 python metaSNV_universal.py --help
 ````
 
-### Compute descriptive statistics :
+### 5. Compute descriptive statistics :
 ````bash
 python metaSNV_stats.py --help
 ````
 
-### Distance computation :
+### 6. Distance computation :
 ````bash
 python metaSNV_DistDiv.py --help
 ````
 
-### Compute pnps values :
+### 7. Compute pnps values :
 ````bash
 python metaSNV_pnps.py --help
 ````
