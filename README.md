@@ -21,6 +21,7 @@ This project relies on metaSNV :
 ## Tutorial ([Original metaSNV tutorial](http://metasnv.embl.de/tutorial.html))
 
 - **Variables :**
+
 `````bash
 OUT=/project/directory/
 SAMPLES=/path/bamfiles_names_list
@@ -31,6 +32,7 @@ GENE_CLEAN=/path/db/annotations
 ### Run the two first steps of metaSNV :
 
 - **Coverage estimation :**
+
 ````bash
 metaSNV.py "${OUT}" "${SAMPLES}" "${FASTA}" --threads 8 --n_splits 40 --db_ann "${GENE_CLEAN}" --print-commands > cov.jobs
 ````
