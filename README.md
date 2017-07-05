@@ -11,16 +11,14 @@ This project relies on metaSNV :
 2. **metaSNV** : metaSNV code
 3. **ANALYSIS**, **DATA**, **RESULTS** : Scripts under work, data to test the and their output
 4. **metaSNV_*.py** : Polished and working scripts, to use after the two first steps of the original metaSNV
-..* metaSNV_filtering.py : Filtering step
-..* metaSNV_join.py : Join datasets (needed when working both on MetaG and MetaT)
-..* metaSNV_universal.py : Extract universal genes
-..* metaSNV_stats.py : Computes descriptive statistics
-..* metaSNV_DistDiv.py : Computes pairwise distances, diversity and FST
-..* metaSNV_pnps.py : Computes pnps per genome and per gene
+    - metaSNV_filtering.py : Filtering step
+    - metaSNV_join.py : Join datasets (needed when working both on MetaG and MetaT)
+    - metaSNV_universal.py : Extract universal genes
+    - metaSNV_stats.py : Computes descriptive statistics
+    - metaSNV_DistDiv.py : Computes pairwise distances, diversity and FST
+    - metaSNV_pnps.py : Computes pnps per genome and per gene
 
 ## Tutorial ([Original metaSNV tutorial](http://metasnv.embl.de/tutorial.html))
-
-### Run the two first steps of metaSNV :
 
 - **Variables :**
 ````bash
@@ -29,6 +27,8 @@ SAMPLES=/path/bamfiles_names_list
 FASTA=/path/db/database.fasta
 GENE_CLEAN=/path/db/annotations
 ````
+
+### Run the two first steps of metaSNV :
 
 - **Coverage estimation :**
 ````bash
