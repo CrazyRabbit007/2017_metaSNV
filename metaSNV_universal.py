@@ -67,7 +67,7 @@ def print_arguments():
     if args.filt:
         print("Filtered folder : {}".format(args.filt))
     if args.universal:
-        print("Suffixe : {}".format(args.universal))
+        print("Universal ids : {}".format(args.universal))
     if args.n_threads:
         print("Number of parallel processes : {}".format(args.n_threads) )
     print("")
@@ -88,7 +88,7 @@ def filter_universal(filt_file, universal, outdir):
         y = x.split(':')[1]
         return y in universal
     
-    index_drop = [index for index in data.index if chek_universal(index)]
+    index_drop = [index for index in data.index if check_universal(index)]
     data = data.drop(index_drop)
     
     data.to_csv(outdir + '/pop/' + '%s.filtered.freq' % species, sep='\t')
