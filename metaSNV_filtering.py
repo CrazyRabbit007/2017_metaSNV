@@ -334,7 +334,7 @@ if __name__ == "__main__":
 
     snp_header = header_comparison(header_cov) #not necessary?! we identify it anyways..
 
-    pars_toprint = '-m{}-d{}-b{}'.format(int(args.m), int(args.d), int(args.b))
+    pars_toprint = '-m{}-d{}-b{}-p{}'.format(int(args.m), int(args.d), int(args.b), float(args.p))
     filt_folder = args.projdir + '/filtered' + pars_toprint + '/'
 
     if not os.path.exists(filt_folder):
