@@ -110,14 +110,14 @@ if __name__ == "__main__":
 
     #####################
 
-    outdir = args.projdir + '/' + args.filtered.rstrip('/').split('/')[-1] + '_universal'
+    outdir = args.projdir + '/' + args.filt.rstrip('/').split('/')[-1] + '_universal'
 
     if not os.path.exists(outdir):
         os.makedirs(outdir)
         if not os.path.exists(outdir + '/pop/'):
             os.makedirs(outdir + '/pop/')
 
-    allFiles = glob.glob(args.filtered + '/pop/*.freq')
+    allFiles = glob.glob(args.filt + '/pop/*.freq')
         
     print "Universal only..."
     
