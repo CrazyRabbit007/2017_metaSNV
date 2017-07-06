@@ -29,7 +29,7 @@ def get_arguments():
     Get commandline arguments and return namespace
     '''
     ## Initialize Parser
-    parser = argparse.ArgumentParser(prog='metaSNV_post.py', description='metaSNV joind metaT and metaG', epilog='''Note:''', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(prog='metaSNV_filtomics.py', description='metaSNV joind metaT and metaG', epilog='''Note:''', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
     # Not Showns:
     parser.add_argument('--version', action='version', version='%(prog)s 2.0', help=argparse.SUPPRESS)
@@ -56,7 +56,7 @@ def file_check():
     args.percentage_file = args.projdir+'/'+args.projdir.split('/')[-1]+'.all_perc.tab'
 
     print("Checking for necessary input files...")
-    if os.path.isfile(args.coverage_file) and os.path.isfile(args.percentage_file) and os.path.isfile(args.all_samples):
+    if os.path.isfile(args.coverage_file) and os.path.isfile(args.percentage_file):
         print("found: '{}' \nfound:'{}' \nfound:'{}'".format(args.coverage_file, args.percentage_file))
     else:
         sys.exit("\nERROR: No such file '{}',\nERROR: No such file '{}',\nERROR: No such file '{}'".format(args.coverage_file, args.percentage_file))
