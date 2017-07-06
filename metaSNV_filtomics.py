@@ -5,6 +5,8 @@ import time
 import argparse
 import glob
 from shutil import copyfile
+from multiprocessing import Pool
+from functools import partial
 
 try:
     import numpy as np
