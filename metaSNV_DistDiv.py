@@ -28,7 +28,7 @@ def get_arguments():
     Get commandline arguments and return namespace
     '''
     ## Initialize Parser
-    parser = argparse.ArgumentParser(prog='metaSNV_post.py', description='metaSNV distance and diversity computation', epilog='''Note:''', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(prog='metaSNV_DistDiv.py', description='metaSNV distance and diversity computation', epilog='''Note:''', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
     # Not Showns:
     parser.add_argument('--version', action='version', version='%(prog)s 2.0', help=argparse.SUPPRESS)
@@ -41,7 +41,7 @@ def get_arguments():
     parser.add_argument('--dist',action='store_true', help="Compute distances")
     parser.add_argument('--div',action='store_true', help="Compute Diversity and FST")
     parser.add_argument('--divNS',action='store_true', help="Computing piN and piS")
-    parser.add_argument('--matched',action='store_true', help="Computing on matched samples")
+    parser.add_argument('--matched',action='store_true', help="Computing on matched positions only")
     parser.add_argument('--n_threads',metavar=': Number of Processes',default=1,type=int, help="Number of jobs to run simmultaneously.")
 
 
@@ -81,7 +81,7 @@ def print_arguments():
     if args.divNS:
         print("Computing N and S diversities : {}".format(args.divNS) )
     if args.matched:
-        print("Matching metaG to metaT : {}".format(args.matched) )
+        print("Matching positions (present in 90% of the samples) : {}".format(args.matched) )
     if args.n_threads:
         print("Number of parallel processes : {}".format(args.n_threads) )
     print("")
@@ -175,14 +175,22 @@ def computeDiv(filt_file, horizontal_coverage, vertical_coverage, bedfile_tab, m
     data = data.sort_index()
     
     ########
+    ## If matched, filter for 'common' positions :
+    if matched:
+        def filt_proportion(x):
+            if len(x) == 2:
+                x = x.iloc[1]
+            n = np.count_nonzero(np.isnan(x))
+            return n>(len(x)*(0.1))
+        
+        index_drop = [index for index in data.index if filt_proportion(data.loc[index])]
+        data = data.drop(index_drop)
+    
+    ########
     ## Number of bases observed :
     genome_length = bedfile_tab.loc[str(species), 2].sum()
-    # raw genome length
-    if matched:
-        correction_coverage = [[genome_length for i in data.columns] for j in data.columns]
     # Genome length corrected for horizontal coverage
-    else:
-        correction_coverage = [[(min(horizontal_coverage.loc[species, i], horizontal_coverage.loc[species, j]) * genome_length) / 100 for i in data.columns] for j in data.columns]
+    correction_coverage = [[(min(horizontal_coverage.loc[species, i], horizontal_coverage.loc[species, j]) * genome_length) / 100 for i in data.columns] for j in data.columns]
 
     ########
     ## Vertical coverage in pi within : AvgCov / (AvgCov - 1)
@@ -223,14 +231,25 @@ def computeDivNS(filt_file, horizontal_coverage, vertical_coverage, bedfile_tab,
     data_S = data.xs('S', level='significance')
     
     ########
+    ## If matched, filter for 'common' positions :
+    if matched:
+        def filt_proportion(x):
+            if len(x) == 2:
+                x = x.iloc[1]
+            n = np.count_nonzero(np.isnan(x))
+            return n>(len(x)*(0.1))
+        
+        index_drop = [index for index in data_N.index if filt_proportion(data_N.loc[index])]
+        data_N = data_N.drop(index_drop)
+
+        index_drop = [index for index in data_S.index if filt_proportion(data_S.loc[index])]
+        data_S = data_S.drop(index_drop)
+    
+    ########
     ## Number of bases observed :
     genome_length = bedfile_tab.loc[str(species), 2].sum()
-    # raw genome length
-    if matched:
-        correction_coverage = [[genome_length for i in data.columns] for j in data.columns]
     # Genome length corrected for horizontal coverage
-    else:
-        correction_coverage = [[(min(horizontal_coverage.loc[species, i], horizontal_coverage.loc[species, j]) * genome_length) / 100 for i in data.columns] for j in data.columns]
+    correction_coverage = [[(min(horizontal_coverage.loc[species, i], horizontal_coverage.loc[species, j]) * genome_length) / 100 for i in data.columns] for j in data.columns]
     
     ########
     ## Vertical coverage in pi within : AvgCov / (AvgCov - 1)
@@ -269,20 +288,20 @@ def computeAllDiv(args):
 
     #All filtered.freq files in input folder
     allFreq = glob.glob(args.filt + '/pop/*.freq')
-
-#    for filt_file in allFreq:
-#        print(filt_file)
-#        computeDiv(filt_file, horizontal_coverage, vertical_coverage, bedfile_tab, args.matched)
-
-    p = Pool(processes = args.n_threads)
-
-    if args.divNS:
-        partial_Div = partial(computeDivNS,  horizontal_coverage = horizontal_coverage, vertical_coverage = vertical_coverage, bedfile_tab = bedfile_tab, matched = args.matched)
-    else:
+    
+    if arg.div:
+        p = Pool(processes = args.n_threads)
         partial_Div = partial(computeDiv,  horizontal_coverage = horizontal_coverage, vertical_coverage = vertical_coverage, bedfile_tab = bedfile_tab, matched = args.matched)
-    p.map(partial_Div, allFreq)
-    p.close()
-    p.join()
+        p.map(partial_Div, allFreq)
+        p.close()
+        p.join()
+
+    if arg.divNS:
+        p = Pool(processes = args.n_threads)
+        partial_DivNS = partial(computeDivNS,  horizontal_coverage = horizontal_coverage, vertical_coverage = vertical_coverage, bedfile_tab = bedfile_tab, matched = args.matched)
+        p.map(partial_DivNS, allFreq)
+        p.close()
+        p.join()
 
 
 ############################################################
@@ -302,7 +321,7 @@ if __name__ == "__main__":
     #####################
 
     if args.matched:
-        outdir = args.projdir + '/distances' + args.pars + '.matched_genes/'
+        outdir = args.projdir + '/distances' + args.pars + '.matched_pos/'
     else:
         outdir = args.projdir + '/distances' + args.pars +'/'
 
@@ -314,11 +333,8 @@ if __name__ == "__main__":
     if args.dist:
         computeAllDist(args)
         
-    if args.div:
+    if args.div or args.divNS:
         computeAllDiv(args)
-
-    if args.divNS:
-        computeAllDivNS(args)
 
 
 

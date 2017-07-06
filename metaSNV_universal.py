@@ -5,16 +5,19 @@ import time
 import argparse
 import glob
 import subprocess
+from shutil import copyfile
+from multiprocessing import Pool
+from functools import partial
 
 try:
     import numpy as np
 except ImportError:
-    sys.stderr.write("Numpy is necessary to run postfiltering.\n")
+    sys.stderr.write("Numpy is necessary to run this script.\n")
     sys.exit(1)
 try:
     import pandas as pd
 except ImportError:
-    sys.stderr.write("Pandas is necessary to run postfiltering.\n")
+    sys.stderr.write("Pandas is necessary to run this script.\n")
     sys.exit(1)
 
 
@@ -28,7 +31,7 @@ def get_arguments():
     Get commandline arguments and return namespace
     '''
     ## Initialize Parser
-    parser = argparse.ArgumentParser(prog='metaSNV_post.py', description='metaSNV post processing', epilog='''Note:''', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(prog='metaSNV_universal.py', description='metaSNV extraction of universal genes', epilog='''Note:''', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
     # Not Showns:
     parser.add_argument('--version', action='version', version='%(prog)s 2.0', help=argparse.SUPPRESS)
@@ -37,6 +40,9 @@ def get_arguments():
     # REQUIRED  arguments:
     parser.add_argument('--filt', metavar=': Filtered frequency files', help="Folder containing /pop/*.filtered.freq", required = True)
     parser.add_argument('--universal', metavar=': Universal genes ID', help="Universal genes ID for the database used")
+    
+    # OPTIONAL  arguments:
+    parser.add_argument('--n_threads',metavar=': Number of Processes',default=1,type=int, help="Number of jobs to run simmultaneously.")
     
     return parser.parse_args()
 
@@ -47,27 +53,23 @@ def file_check():
     ''' Check if required files exist (True / False)'''
     args.projdir = '/'.join(args.filt.rstrip('/').split('/')[:-1])
     args.pars = args.filt.rstrip('/').split('/')[-1].strip('filtered')
-    args.bedfile = args.projdir+'/'+'bed_header'
     
     print("Checking for necessary input files...")
-    if os.path.isfile(args.coverage_file) and os.path.isfile(args.percentage_file) and os.path.isfile(args.bedfile):
-        print("found: '{}' \nfound:'{}' \nfound:'{}'".format(args.coverage_file, args.percentage_file, args.bedfile))
+    if os.path.isfile(args.universal):
+        print("found: '{}'".format(args.universal))
     else:
-        sys.exit("\nERROR: No such file '{}',\nERROR: No such file '{}',\nERROR: No such file '{}'".format(args.coverage_file, args.percentage_file, args.bedfile))
+        sys.exit("\nERROR: No such file '{}'".format(args.universal))
 
 
 def print_arguments():
     print("")
     print("Checking required arguments:")
     if args.filt:
-        print("Filtered folder : {}".format(args.filt) )
-    if args.pars:
-        print("Suffixe : {}".format(args.pars) )
-    print("Options:")
-    if args.b:
-        print("threshold: percentage covered (breadth) {}".format(args.b) )
-    if args.d:
-        print("threshold: average coverage (depth) {}".format(args.d) )
+        print("Filtered folder : {}".format(args.filt))
+    if args.universal:
+        print("Suffixe : {}".format(args.universal))
+    if args.n_threads:
+        print("Number of parallel processes : {}".format(args.n_threads) )
     print("")
 
 
@@ -75,118 +77,60 @@ def print_arguments():
 ### Compute Statistics
 
 
-def computeStats(args):
-
-    def get_multiallelic(positions):
-        seen = set()
-        seen2 = set()
-        seen3 = set()
-        seen_add = seen.add
-        seen2_add = seen2.add
-        seen3_add = seen3.add
-        for item in positions:
-            if item in seen2:
-                seen3_add(item)
-            elif item in seen:
-                seen2_add(item)
-            else:
-                seen_add(item)
-        return list(seen), list(seen2), list(seen3)
-
-    def get_stats(data, stats_df, species, type = ''):
-
-        positions = list(data.index.get_level_values('position'))
-        stats_df.loc[species,'Number of ' + type + 'SNVs'] = len(positions)
-
-        multiallelics = get_multiallelic(positions)
-        stats_df.loc[species,type+'Quadriallelic'] = len(multiallelics[2])
-        stats_df.loc[species,type+'Triallelic'] = len(multiallelics[1]) - len(multiallelics[2])
-        stats_df.loc[species,type+'Biallelic'] = len(multiallelics[0]) - len(multiallelics[1])
+def filter_universal(filt_file, universal, outdir):
     
-        return stats_df
-
-    print "Computing Statistics"
-
-    allFreq = glob.glob(args.filt + '/pop/*.freq')
-    index = [int(f.split('/')[-1].split('.')[0]) for f in allFreq]
-    columns = ['Number of variable positions','Number of SNVs','Number of S SNVs', 'Number of N SNVs',
-    'Biallelic','Triallelic','Quadriallelic',
-    'S Biallelic','S Triallelic','S Quadriallelic',
-    'N Biallelic','N Triallelic','N Quadriallelic',
-    'Length genome','Avg Hcov','Avg Vcov','SNVs per Kb']
-    stats_df = pd.DataFrame(index=index, columns=columns)
+    species = int(filt_file.split('/')[-1].split('.')[0])
     
-    # Load external info : Coverage, genomes size, genes size
-    horizontal_coverage = pd.read_table(args.percentage_file, skiprows=[1], index_col=0)
-    vertical_coverage = pd.read_table(args.coverage_file, skiprows=[1], index_col=0)
-    bedfile_tab = pd.read_table(args.bedfile, index_col=0, header=None)
-    bed_index = [i.split('.')[0] for i in list(bedfile_tab.index)]
-    bedfile_tab = bedfile_tab.set_index(pd.Index(bed_index))
+    data = pd.read_table(filt_file, index_col=0, na_values=['-1'])
+    data = data.sort_index()
     
-    for f in allFreq:
-        species = int(f.split('/')[-1].split('.')[0])
-        
-        print species
-        
-        genome_length = bedfile_tab.loc[str(species), 2].sum()
-        stats_df.loc[species,'Length genome'] = genome_length
-        stats_df.loc[species,'Avg Hcov'] = horizontal_coverage.loc[species, :][horizontal_coverage.loc[species, :]>=args.b].mean()
-        stats_df.loc[species,'Avg Vcov'] = vertical_coverage.loc[species, :][vertical_coverage.loc[species, :]>=args.d].mean()
-        
-        # Read the freq table as data.frame
-        data = pd.read_table(f, index_col=0, na_values=['-1'])
-        pre_index = [i.split(':') for i in list(data.index)]
-        pos_index = [item[0] + ':' + item[1] + ':' + item[2] for item in pre_index]
-        # Setting index for Non-synonymous vs Synonymous
-        sig_index = [item[4] for item in pre_index]
-        sig_index = [sig.split('[')[0] for sig in sig_index]
-        data = data.set_index(pd.MultiIndex.from_arrays([pos_index, sig_index], names=['position', 'significance']))
-        data = data.sort_index()
-        
-        positions = list(data.index.get_level_values('position'))
-        stats_df.loc[species,'Number of variable positions'] = len(set(positions))
-        
-        stats_df = get_stats(data, stats_df, species)
-        
-        data_N = data.xs('N', level='significance')
-        data_S = data.loc[(slice(None), ['.','S']),:]
-        stats_df = get_stats(data_N, stats_df, species, 'N ')
-        stats_df = get_stats(data_S, stats_df, species, 'S ')
-        
-        sp_dict = {Key : None for Key in data.columns}
-        data_richness = data
-        data_richness[data_richness == 1] = 0
-        data_richness[data_richness > 0] = 1
-        
-        for col in data_richness.columns:
-            positions_filtered = [i for (i, v) in zip(list(data_richness.index.get_level_values('position')), -np.isnan(data_richness.loc[:,col].values)) if v]
-            sp_dict[col] = (np.nansum(data_richness.loc[:,col].values) + len(set(positions_filtered))) / len(set(positions_filtered))
-        
-        sp_richness = pd.DataFrame.from_dict(sp_dict, orient = 'index')
-        sp_richness.to_csv(args.outdir + '/' + str(species) + args.pars + '.stats.tab', sep='\t')
+    def check_universal(x):
+        y = x.split(':')[1]
+        return y in universal
     
-    stats_df.loc[:,'SNVs per Kb'] = stats_df.loc[:,'Number of variable positions']/(stats_df.loc[:,'Length genome']/1000*stats_df.loc[:,'Avg Hcov']/100)
-    stats_df.to_csv(args.projdir + '/' +args.projdir.split('/')[-1] + args.pars + '.stats.tab', sep='\t')
+    index_drop = [index for index in data.index if chek_universal(index)]
+    data = data.drop(index_drop)
+    
+    data.to_csv(outdir + '/pop/' + '%s.filtered.freq' % species, sep='\t')
     
 
 ############################################################
 ### Script
 
 if __name__ == "__main__":
-
+    
+    #####################
+    
     args = get_arguments()
-    file_check()
     print_arguments()
+    file_check()
     
-    args.outdir = args.projdir + '/' + 'Stats' + args.pars
-    
-    if not os.path.exists(args.outdir):
-        os.makedirs(args.outdir)
-
     if args.debug:
         print_arguments()
 
-    computeStats(args)
+    #####################
+
+    outdir = args.projdir + '/' + args.filtered.rstrip('/').split('/')[-1] + '_universal'
+
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+        if not os.path.exists(outdir + '/pop/'):
+            os.makedirs(outdir + '/pop/')
+
+    allFiles = glob.glob(args.filtered + '/pop/*.freq')
+        
+        print "Universal only..."
+        
+        # Load external info : universal genes ID
+        with open(args.universal) as f:
+            universal = f.read().splitlines()
+        
+        p = Pool(processes = args.n_threads)
+        partial_filt = partial(filter_universal,  universal = universal, outdir = outdir)
+        p.map(partial_filt, allFiles)
+        p.close()
+        p.join()
+
 
 
 

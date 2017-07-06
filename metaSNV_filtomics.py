@@ -11,12 +11,12 @@ from functools import partial
 try:
     import numpy as np
 except ImportError:
-    sys.stderr.write("Numpy is necessary to run postfiltering.\n")
+    sys.stderr.write("Numpy is necessary to run this script.\n")
     sys.exit(1)
 try:
     import pandas as pd
 except ImportError:
-    sys.stderr.write("Pandas is necessary to run postfiltering.\n")
+    sys.stderr.write("Pandas is necessary to run this script.\n")
     sys.exit(1)
 
 
@@ -31,7 +31,7 @@ def get_arguments():
     Get commandline arguments and return namespace
     '''
     ## Initialize Parser
-    parser = argparse.ArgumentParser(prog='metaSNV_filtomics.py', description='metaSNV joind metaT and metaG', epilog='''Note:''', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(prog='metaSNV_filtomics.py', description='metaSNV addtional filtering for metaT and metaG', epilog='''Note:''', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
     # Not Showns:
     parser.add_argument('--version', action='version', version='%(prog)s 2.0', help=argparse.SUPPRESS)

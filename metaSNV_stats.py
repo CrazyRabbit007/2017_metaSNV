@@ -8,12 +8,12 @@ import glob
 try:
     import numpy as np
 except ImportError:
-    sys.stderr.write("Numpy is necessary to run postfiltering.\n")
+    sys.stderr.write("Numpy is necessary to run this script.\n")
     sys.exit(1)
 try:
     import pandas as pd
 except ImportError:
-    sys.stderr.write("Pandas is necessary to run postfiltering.\n")
+    sys.stderr.write("Pandas is necessary to run this script.\n")
     sys.exit(1)
 
 
@@ -28,7 +28,7 @@ def get_arguments():
     Get commandline arguments and return namespace
     '''
     ## Initialize Parser
-    parser = argparse.ArgumentParser(prog='metaSNV_post.py', description='metaSNV post processing', epilog='''Note:''', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(prog='metaSNV_stats.py', description='metaSNV descriptive statistics computation', epilog='''Note:''', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
     # Not Showns:
     parser.add_argument('--version', action='version', version='%(prog)s 2.0', help=argparse.SUPPRESS)
@@ -36,6 +36,7 @@ def get_arguments():
     
     # REQUIRED  arguments:
     parser.add_argument('--filt', metavar=': Filtered frequency files', help="Folder containing /pop/*.filtered.freq", required = True)
+    
     # OPTIONAL  arguments:
     parser.add_argument('-b', metavar='FLOAT', type=float, default=40.0, help="Coverage breadth treshold used in filtering")
     parser.add_argument('-d', metavar='FLOAT', type=float, default=5.0, help="Coverage depth treshold used in filtering")
@@ -178,17 +179,21 @@ def computeStats(args):
 
 if __name__ == "__main__":
 
+    #####################
+
     args = get_arguments()
     file_check()
     print_arguments()
     
+    if args.debug:
+        print_arguments()
+    
+    #####################
+
     args.outdir = args.projdir + '/' + 'Stats' + args.pars
     
     if not os.path.exists(args.outdir):
         os.makedirs(args.outdir)
-
-    if args.debug:
-        print_arguments()
 
     computeStats(args)
 

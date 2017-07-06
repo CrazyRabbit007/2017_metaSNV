@@ -4,16 +4,19 @@ import sys
 import time
 import argparse
 import glob
+from shutil import copyfile
+from multiprocessing import Pool
+from functools import partial
 
 try:
     import numpy as np
 except ImportError:
-    sys.stderr.write("Numpy is necessary to run postfiltering.\n")
+    sys.stderr.write("Numpy is necessary to run this script.\n")
     sys.exit(1)
 try:
     import pandas as pd
 except ImportError:
-    sys.stderr.write("Pandas is necessary to run postfiltering.\n")
+    sys.stderr.write("Pandas is necessary to run this script.\n")
     sys.exit(1)
 
 
@@ -28,10 +31,14 @@ def get_arguments():
     Get commandline arguments and return namespace
     '''
     ## Initialize Parser
-    parser = argparse.ArgumentParser(prog='metaSNV_post.py', description='metaSNV post processing', epilog='''Note:''', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(prog='metaSNV_filtering.py', description='metaSNV filtering step', epilog='''Note:''', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    
     # Not Showns:
     parser.add_argument('--version', action='version', version='%(prog)s 2.0', help=argparse.SUPPRESS)
     parser.add_argument("--debug", action="store_true", help=argparse.SUPPRESS)
+    
+    # REQUIRED  arguments:
+    parser.add_argument('projdir', help='project name', metavar='Proj')
     
     # OPTIONAL arguments:
     parser.add_argument('-b', metavar='FLOAT', type=float, default=40.0,
@@ -42,8 +49,6 @@ def get_arguments():
     parser.add_argument('-c',metavar='FLOAT', type=float, help="FILTERING STEP II: minimum coverage per position per sample per species", default=5.0)
     parser.add_argument('-p',metavar='FLOAT', type=float, help="FILTERING STEP II: required proportion of informative samples (coverage non-zero) per position", default=0.50)
     parser.add_argument('--ind',action='store_true',help="Compute individual SNVs")
-    # REQUIRED  arguments:
-    parser.add_argument('projdir', help='project name', metavar='Proj')
     
     return parser.parse_args()
 
