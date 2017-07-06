@@ -119,17 +119,17 @@ if __name__ == "__main__":
 
     allFiles = glob.glob(args.filtered + '/pop/*.freq')
         
-        print "Universal only..."
-        
-        # Load external info : universal genes ID
-        with open(args.universal) as f:
-            universal = f.read().splitlines()
-        
-        p = Pool(processes = args.n_threads)
-        partial_filt = partial(filter_universal,  universal = universal, outdir = outdir)
-        p.map(partial_filt, allFiles)
-        p.close()
-        p.join()
+    print "Universal only..."
+    
+    # Load external info : universal genes ID
+    with open(args.universal) as f:
+        universal = f.read().splitlines()
+    
+    p = Pool(processes = args.n_threads)
+    partial_filt = partial(filter_universal,  universal = universal, outdir = outdir)
+    p.map(partial_filt, allFiles)
+    p.close()
+    p.join()
 
 
 
