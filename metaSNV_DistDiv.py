@@ -289,14 +289,14 @@ def computeAllDiv(args):
     #All filtered.freq files in input folder
     allFreq = glob.glob(args.filt + '/pop/*.freq')
     
-    if arg.div:
+    if args.div:
         p = Pool(processes = args.n_threads)
         partial_Div = partial(computeDiv,  horizontal_coverage = horizontal_coverage, vertical_coverage = vertical_coverage, bedfile_tab = bedfile_tab, matched = args.matched)
         p.map(partial_Div, allFreq)
         p.close()
         p.join()
 
-    if arg.divNS:
+    if args.divNS:
         p = Pool(processes = args.n_threads)
         partial_DivNS = partial(computeDivNS,  horizontal_coverage = horizontal_coverage, vertical_coverage = vertical_coverage, bedfile_tab = bedfile_tab, matched = args.matched)
         p.map(partial_DivNS, allFreq)
