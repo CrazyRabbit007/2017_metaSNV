@@ -57,9 +57,9 @@ def file_check():
 
     print("Checking for necessary input files...")
     if os.path.isfile(args.coverage_file) and os.path.isfile(args.percentage_file):
-        print("found: '{}' \nfound:'{}' \nfound:'{}'".format(args.coverage_file, args.percentage_file))
+        print("found: '{}' \nfound:'{}'".format(args.coverage_file, args.percentage_file))
     else:
-        sys.exit("\nERROR: No such file '{}',\nERROR: No such file '{}',\nERROR: No such file '{}'".format(args.coverage_file, args.percentage_file))
+        sys.exit("\nERROR: No such file '{}',\nERROR: No such file '{}'".format(args.coverage_file, args.percentage_file))
 
 
 def print_arguments():
