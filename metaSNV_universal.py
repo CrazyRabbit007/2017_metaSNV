@@ -39,7 +39,7 @@ def get_arguments():
     
     # REQUIRED  arguments:
     parser.add_argument('--filt', metavar=': Filtered frequency files', help="Folder containing /pop/*.filtered.freq", required = True)
-    parser.add_argument('--universal', metavar=': Universal genes ID', help="Universal genes ID for the database used")
+    parser.add_argument('--universal', metavar=': Universal genes ID', help="Universal genes ID for the database used", required = True)
     
     # OPTIONAL  arguments:
     parser.add_argument('--n_threads',metavar=': Number of Processes',default=1,type=int, help="Number of jobs to run simmultaneously.")
