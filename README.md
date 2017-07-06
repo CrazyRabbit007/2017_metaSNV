@@ -1,9 +1,9 @@
 # metaSNV-LP : In-house custom version under development
 
 **This project relies on metaSNV :**
-- Paper : Under revision
-- [Compagnon website](http://metasnv.embl.de/index.html)
-- [GitLab](https://git.embl.de/costea/metaSNV) : Check for latest update of the core code. Last checked on 2017-07-05. 
+- [MetaSNV Paper] : Under revision
+- [MetaSNV Compagnon website](http://metasnv.embl.de/index.html)
+- [MetaSNV GitLab](https://git.embl.de/costea/metaSNV) : Check for latest update of the core code. Last checked on 2017-07-05. 
 
 **Purpose :**
 
