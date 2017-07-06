@@ -86,7 +86,7 @@ def filter_universal(filt_file, universal, outdir):
     
     def check_universal(x):
         y = x.split(':')[1]
-        return y in universal
+        return y not in universal
     
     index_drop = [index for index in data.index if check_universal(index)]
     data = data.drop(index_drop)
