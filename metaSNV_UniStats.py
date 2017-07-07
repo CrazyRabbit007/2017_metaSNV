@@ -36,7 +36,7 @@ def get_arguments():
     
     # REQUIRED  arguments:
     parser.add_argument('--filt', metavar=': Filtered frequency files', help="Folder containing /pop/*.filtered.freq", required = True)
-    parser.add_argument('--annot', metavar=': Annotation file', help="Bedfile containing genomes annotations", required = True)
+    parser.add_argument('--bedfile', metavar=': Annotation file', help="Bedfile containing genomes annotations", required = True)
     
     # OPTIONAL  arguments:
     parser.add_argument('-b', metavar='FLOAT', type=float, default=40.0, help="Coverage breadth treshold used in filtering")
