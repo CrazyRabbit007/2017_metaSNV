@@ -55,10 +55,10 @@ def file_check():
     args.percentage_file = args.projdir+'/'+args.projdir.split('/')[-1]+'.all_perc.tab'
     
     print("Checking for necessary input files...")
-    if os.path.isfile(args.coverage_file) and os.path.isfile(args.percentage_file) and os.path.isfile(args.annot):
-        print("found: '{}' \nfound:'{}' \nfound:'{}'".format(args.coverage_file, args.percentage_file, args.annot))
+    if os.path.isfile(args.coverage_file) and os.path.isfile(args.percentage_file) and os.path.isfile(args.bedfile):
+        print("found: '{}' \nfound:'{}' \nfound:'{}'".format(args.coverage_file, args.percentage_file, args.bedfile))
     else:
-        sys.exit("\nERROR: No such file '{}',\nERROR: No such file '{}',\nERROR: No such file '{}'".format(args.coverage_file, args.percentage_file, args.annot))
+        sys.exit("\nERROR: No such file '{}',\nERROR: No such file '{}',\nERROR: No such file '{}'".format(args.coverage_file, args.percentage_file, args.bedfile))
 
 
 def print_arguments():
@@ -66,8 +66,8 @@ def print_arguments():
     print("Checking required arguments:")
     if args.filt:
         print("Filtered folder : {}".format(args.filt) )
-    if args.annot:
-        print("Filtered folder : {}".format(args.annot) )
+    if args.bedfile:
+        print("Filtered folder : {}".format(args.bedfile) )
     if args.pars:
         print("Suffixe : {}".format(args.pars) )
     print("Options:")
