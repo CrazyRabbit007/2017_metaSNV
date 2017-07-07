@@ -145,7 +145,7 @@ def computeStats(args):
         
         list_genes = set([item[1] for item in pre_index])
         print list_genes
-        genome_length = int(bedfile_tab.loc[list_genes].sum())
+        genome_length = sum([int(x) for x in bedfile_tab.loc[list_genes,5].tolist()])
 
         stats_df.loc[species,'Length genome'] = genome_length
         stats_df.loc[species,'Avg Hcov'] = horizontal_coverage.loc[species, :][horizontal_coverage.loc[species, :]>=args.b].mean()
