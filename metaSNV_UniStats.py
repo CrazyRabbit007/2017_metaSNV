@@ -143,7 +143,7 @@ def computeStats(args):
         data = data.set_index(pd.MultiIndex.from_arrays([pos_index, sig_index], names=['position', 'significance']))
         data = data.sort_index()
         
-        list_genes = [item[1] for item in pre_index]
+        list_genes = set([item[1] for item in pre_index])
         print list_genes
         genome_length = int(bedfile_tab.loc[list_genes].sum())
 
