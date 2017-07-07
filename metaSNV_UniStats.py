@@ -148,8 +148,9 @@ def computeStats(args):
         genome_length = sum([int(x) for x in bedfile_tab.loc[list_genes,5].tolist()])
 
         stats_df.loc[species,'Length genome'] = genome_length
-        stats_df.loc[species,'Avg Hcov'] = horizontal_coverage.loc[species, :][horizontal_coverage.loc[species, :]>=args.b].mean()
-        stats_df.loc[species,'Avg Vcov'] = vertical_coverage.loc[species, :][vertical_coverage.loc[species, :]>=args.d].mean()
+        col = [col for col in data.columns if '_G.filtered' in col]
+        stats_df.loc[species,'Avg Hcov'] = horizontal_coverage.loc[species, col][horizontal_coverage.loc[species, col]>=args.b].mean()
+        stats_df.loc[species,'Avg Vcov'] = vertical_coverage.loc[species, col][vertical_coverage.loc[species, col]>=args.d].mean()
         
         positions = list(data.index.get_level_values('position'))
         stats_df.loc[species,'Number of variable positions'] = len(set(positions))
