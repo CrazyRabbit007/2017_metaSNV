@@ -126,7 +126,7 @@ def computeStats(args):
     # Load external info : Coverage, genomes size, genes size
     horizontal_coverage = pd.read_table(args.percentage_file, skiprows=[1], index_col=0)
     vertical_coverage = pd.read_table(args.coverage_file, skiprows=[1], index_col=0)
-    bedfile_tab = data = pd.read_table(args.bedfile_tab, index_col=0, header =None,usecols=[1,5])
+    bedfile_tab = data = pd.read_table(args.bedfile, index_col=0, header =None,usecols=[1,5])
     
     for f in allFreq:
         species = int(f.split('/')[-1].split('.')[0])
