@@ -173,7 +173,7 @@ def computeStats(args):
         sp_richness = pd.DataFrame.from_dict(sp_dict, orient = 'index')
         sp_richness.to_csv(args.outdir + '/' + str(species) + args.pars + '.stats.tab', sep='\t')
     
-    stats_df.loc[:,'SNVs per Kb'] = stats_df.loc[:,'Number of variable positions']/(stats_df.loc[:,'Length genome']/1000*stats_df.loc[:,'Avg Hcov']/100)
+    stats_df.loc[:,'SNVs per Kb'] = stats_df.loc[:,'Number of variable positions']/(stats_df.loc[:,'Length genome']/1000)
     stats_df.to_csv(args.projdir + '/' +args.projdir.split('/')[-1] + args.pars + '.stats.tab', sep='\t')
     
 
