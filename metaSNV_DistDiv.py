@@ -20,6 +20,9 @@ except ImportError:
     sys.exit(1)
 
 
+basedir = os.path.dirname(os.path.abspath(__file__))
+
+
 ############################################################
 ### Parse Commandline Arguments
 

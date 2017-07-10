@@ -4,6 +4,7 @@ import sys
 import time
 import argparse
 import glob
+from multiprocessing import Pool
 
 try:
     import numpy as np
