@@ -5,6 +5,8 @@ import time
 import argparse
 import glob
 import subprocess
+import shutils
+from collections import Counter
 from multiprocessing import Pool
 
 try:
@@ -81,53 +83,60 @@ def print_arguments():
 ############################################################
 ### Compute Pn/Ps
 
-def get_seq(file, gene):
-    """Return the sequence corresponding to the gene identifier as a string"""
-    for seq_record in SeqIO.parse(file, "fasta"):
-        seq_gene = str(seq_record.id).split(':')[1]
-        if seq_gene == gene:
-            return str(seq_record.seq)
-
-
-def get_codon_usage(string,codons):
-    """Return the number of each codon from a string"""
-    if len(string) % 3 == 0:
-        split = [string[i:i+3] for i in range(0, len(string), 3)]
-        return {x:split.count(x) for x in codons}
-    else:
-        return {x:np.NaN for x in codons}
-
-
-def get_exp_ratio(file,codons):
-    """Getting the expected ratio"""
-    exp_S=0
-    exp_N=0
+def get_exp_ratio(file,genes):
+    """Getting the expected ratios from a species fasta file"""
+    
+    genes_exp = pd.DataFrame(index = genes, columns = ['Exp_ratio'])
+    all_dict=Counter({})
+    
     for seq_record in SeqIO.parse(file, "fasta"):
         seq = str(seq_record.seq)
+        seq_gene = str(seq_record.id).split(':')[1]
         if len(seq) % 3 == 0:
             split = [seq[i:i+3] for i in range(0, len(seq), 3)]
-            dict = {x:split.count(x) for x in codons}
+            gene_dict = Counter({x:split.count(x) for x in codons})
         else:
-            dict = {x:np.NaN for x in codons}
-        temp_df = pd.DataFrame.from_dict(dict,orient="index")
-        # Edit values
-        exp_S += np.nansum(temp_df[0]*sig_table["Synonymous"])
-        exp_N += np.nansum(temp_df[0]*sig_table["Non_Synonymous"])
-    return exp_N/exp_S
+            gene_dict = Counter({x:np.NaN for x in codons})
+        
+        gene_df = pd.DataFrame.from_dict(gene_dict,orient="index")
+        if (np.nansum(gene_df[0]*sig_table["Synonymous"]) == 0) or (np.nansum(gene_df[0]*sig_table["Non_Synonymous"]) == 0):
+            gene_ratio = np.NaN
+        else:
+            gene_ratio = np.nansum(gene_df[0]*sig_table["Non_Synonymous"])/np.nansum(gene_df[0]*sig_table["Synonymous"])
+        genes_exp.iloc[seq_gene][0] = gene_ratio
+        all_dict += gene_dict
 
+    all_df = pd.DataFrame.from_dict(all_dict,orient="index")
+    if (np.nansum(all_df[0]*sig_table["Synonymous"]) == 0) or (np.nansum(all_df[0]*sig_table["Non_Synonymous"]) == 0):
+        all_ratio = np.NaN
+    else:
+        all_ratio = np.nansum(all_df[0]*sig_table["Non_Synonymous"])/np.nansum(all_df[0]*sig_table["Synonymous"])
 
-def get_obs_ratio(data,i):
+    return all_ratio, genes_exp
+
+def compute_gene_obs_ratio(data,i,genes):
+    genes_obs = []
+    for g in genes :
+        if 'S' not in data.loc[g][i].index:
+            genes_obs.append(np.NaN)
+        elif np.nansum(data.loc[g,"S"][i]) == 0:
+            genes_obs.append(np.NaN)
+        else:
+            if 'N' not in data.loc[g][i].index:
+                genes_obs.append(np.NaN)
+            else:
+                genes_obs.append(np.nansum(data.loc[g,"N"][i])/np.nansum(data.loc[g,"S"][i]))
+    return genes_obs
+
+def compute_all_obs_ratio(data,i):
     obs_N = np.nansum(data.xs('N', level='significance')[i])
     obs_S = np.nansum(data.xs('S', level='significance')[i])
     return obs_N/float(obs_S)
 
 
-def pnps(f):
+def pnps(f, all_df):
     species = int(f.split('/')[-1].split('.')[0])
     print species
-    
-    samples = [line.split('/')[-1].replace('\n','') for line in f]
-    species_df = pd.DataFrame(index=species, columns=[samples])
     
     cmd1 = ['cut -f1', f ,' | cut -f2 -d\':\' | grep -v - | grep -v ^$ | sort -u > ', args.temp + species + '.genes']
     subprocess.call(cmd1)
@@ -144,18 +153,21 @@ def pnps(f):
     index1 = [item[1] for item in pre_index]
     # Setting index for Non-synonymous vs Synonymous
     index2 = [item[4].split('[')[0] for item in pre_index]
-    index = pd.MultiIndex.from_arrays([index1, index2], names=['genes', 'significance'])
-    data = data.set_index(index)
+    data = data.set_index(pd.MultiIndex.from_arrays([index1, index2], names=['genes', 'significance']))
     data = data.sort_index()
     genes = list(data.index.levels[0])
     genes = [x for x in genes if x != '-']
     data = data.loc[genes]
     
-    exp = get_exp_ratio(fastafile,codons)
-    for i in data.columns:
-        species_df.loc[sp][i] = get_obs_ratio(data,i)/exp
+    species_df = pd.DataFrame(index=genes, columns=data.columns)
     
-    species_df.to_csv(projdir + '/pnps/' + 'summary.pnps', sep='\t')
+    all_exp_ratio, genes_exp_df = get_exp_ratio(fastafile,genes)
+    
+    for i in data.columns:
+        all_df.loc[sp][i] = compute_all_obs_ratio(data,i)/all_exp_ratio
+        species_df.loc[:,i] = compute_genes_obs_ratio(data,i)/genes_exp_df.loc[:,0]
+    
+    species_df.to_csv(args.pnps + '/' + species + '.pnps', sep='\t')
 
     return all_df
 
@@ -166,12 +178,43 @@ def Allpnps(args):
     codons = ["GCA","GCC","GCG","GCT","TGC","TGT","GAC","GAT","GAA","GAG","TTC","TTT","GGA","GGC","GGG","GGT","CAC","CAT","ATA","ATC","ATT","AAA","AAG","CTA","CTC","CTG","CTT","TTA","TTG","ATG","AAC","AAT","CCA","CCC","CCG","CCT","CAA","CAG","AGA","AGG","CGA","CGC","CGG","CGT","AGC","AGT","TCA","TCC","TCG","TCT","TAA","TAG","TGA","ACA","ACC","ACG","ACT","GTA","GTC","GTG","GTT","TGG","TAC","TAT"]
     
     allFreq = glob.glob(args.filt + '/pop/*.freq')
-    allSpeceis =
+    allSpecies = [sp.split('/')[-1].strip('.filtered.freq') for sp in allFreq]
+    with open(args.projdir + 'all_samples') as samples:
+        allSamples = samples.read().splitlines()
+    allSamples = [samples.split('/')[-1] for samples in allSamples]
+
+    all_df = pd.DataFrame(index = allSpecies, columns = allSamples)
 
     for f in allFreq:
-        pnps(f)
+        all_df = pnps(f, all_df)
+
+    all_df.to_csv(args.pnps + '/Summary.pnps', sep='\t')
 
 
+############################################################
+### Script
+
+if __name__ == "__main__":
+    
+    #####################
+    
+    args = get_arguments()
+    file_check()
+    print_arguments()
+    
+    if args.debug:
+        print_arguments()
+    
+    #####################
+    
+    if not os.path.exists(args.pnps):
+        os.makedirs(args.pnps)
+    if not os.path.exists(args.temp):
+        os.makedirs(args.temp)
+    
+    Allpnps(args)
+
+    shutil.rmtree(args.temp)
 
 
 
