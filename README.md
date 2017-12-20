@@ -20,7 +20,11 @@
     - getRefDB.sh
     
 2. **Code edits** : 
-    - TO IDENTIFY
+    - metaSNV.py :
+![alt text](https://github.com/LucasPaoli/2017_metaSNV/blob/master/Capture%20d%E2%80%99e%CC%81cran%202017-12-20%20a%CC%80%2019.04.39.png "metaSNV.py edit")
+    - collapse_coverages.py :
+![alt text](https://github.com/LucasPaoli/2017_metaSNV/blob/master/Capture%20d%E2%80%99e%CC%81cran%202017-12-20%20a%CC%80%2019.04.29.png "collapse_coverages.py edit")
+
     
 3. **Additional files** : 
     - metaSNV_Filtering_2.0.py : Parallelized filtering step
