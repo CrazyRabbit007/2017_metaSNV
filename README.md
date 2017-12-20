@@ -25,8 +25,8 @@
 3. **Additional files** : 
     - metaSNV_Filtering_2.0.py : Parallelized filtering step
     - metaSNV_DistDiv.py : Computes pairwise distances, nucleotide diversity and FST
-    - motus.remove.padded.sh : Remove padded regions from filtered files
-    - match.motu.freeze.ids.sh : produces a map between mOTUs ids and freeze ids
+    - motus.remove.padded.sh : Removes padded regions from filtered files
+    - match.motu.freeze.ids.sh : Produces a map between mOTUs ids and freeze ids
 
 ## Example script :
 ```
