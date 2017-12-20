@@ -1,4 +1,4 @@
-# metaSNV-LP : In-house customized version *under development*
+# In-house customized version *under development*
 
 **This repo is based on metaSNV :**
 - [MetaSNV Paper](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0182392)
