@@ -5,16 +5,6 @@
 - [MetaSNV Compagnon website](http://metasnv.embl.de/index.html)
 - [MetaSNV GitLab](https://git.embl.de/costea/metaSNV) 
 
-**Purpose :**
-
-Identify variable genomic positions from aligned metagenomic data (bamfiles), describe the populations (samples) and compute genetic distances between said populations.
-
-**Input :**
-- Bamfiles
-- Database
-    - Reference genomes (fasta)
-    - Gene annotations (bed)
-
 ## Structure of the repository
 
 1. **Original metaSNV structure** : 
