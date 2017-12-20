@@ -37,7 +37,7 @@ Identify variable genomic positions from aligned metagenomic data (bamfiles), de
     - match.motu.freeze.ids.sh : produces a map between mOTUs ids and freeze ids
 
 ## Example script :
-
+```
 ###########################################
 echo -e "\n\n*************************\n\n"
 echo "0. LOADING MODULES"
