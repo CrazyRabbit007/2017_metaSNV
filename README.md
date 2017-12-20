@@ -1,9 +1,9 @@
-# metaSNV-LP : In-house custom version under development
+# metaSNV-LP : In-house customized version *under development*
 
-**This project relies on metaSNV :**
-- [MetaSNV Paper] : Under revision
+**This repo is based on metaSNV :**
+- [MetaSNV Paper](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0182392)
 - [MetaSNV Compagnon website](http://metasnv.embl.de/index.html)
-- [MetaSNV GitLab](https://git.embl.de/costea/metaSNV) : Check for latest update of the core code. Last checked on 2017-07-05. 
+- [MetaSNV GitLab](https://git.embl.de/costea/metaSNV) 
 
 **Purpose :**
 
@@ -17,78 +17,99 @@ Identify variable genomic positions from aligned metagenomic data (bamfiles), de
 
 ## Structure of the repository
 
-1. **PHASE_META_SNP** : Archive of the first software draft (early 2017)
-2. **metaSNV** : metaSNV code
-3. **ANALYSIS**, **DATA**, **RESULTS** : Scripts under work, data to test them and their output
-4. **metaSNV_*.py** : Polished and working scripts, to use after the two first steps of the original metaSNV
-    - metaSNV_filtering.py : Filtering step
-    - metaSNV_filtomics.py : Supplementary filtering (needed when working both on MetaG and MetaT)
-    - metaSNV_universal.py : Extract universal genes
-    - metaSNV_stats.py : Computes descriptive statistics
+1. **Original metaSNV structure** : 
+    - README_metaSNV.md
+    - metaSNV.py
+    - metaSNV_post.py
+    - src/
+    - db/
+    - LICENSE
+    - Makefile
+    - SETUPFILE
+    - EXAMPLE/
+    - getRefDB.sh
+2. **Code edits** : 
+    - TO IDENTIFY
+3. **Additional files** : 
+    - metaSNV_Filtering_2.0.py : Parallelized filtering step
     - metaSNV_DistDiv.py : Computes pairwise distances, nucleotide diversity and FST
-    - metaSNV_pnps.py : Computes pnps per genome and per gene #WorkInProgress
+    - motus.remove.padded.sh : Remove padded regions from filtered files
+    - match.motu.freeze.ids.sh : produces a map between mOTUs ids and freeze ids
 
-## Tutorial ([Original metaSNV tutorial](http://metasnv.embl.de/tutorial.html))
+## Example script :
 
-- **Variables :**
+###########################################
+echo -e "\n\n*************************\n\n"
+echo "0. LOADING MODULES"
+echo -e "\n\n*************************\n\n"
+###########################################
 
-`````bash
-OUT=/project/directory/
-SAMPLES=/path/bamfiles_names_list
-FASTA=/path/db/database.fasta
-GENE_CLEAN=/path/db/annotations
-`````
+ml HTSlib
+ml Boost
+ml Python
 
-### 1. Run the two first steps of metaSNV :
+metaSNV_dir=~/DEV_METASNV/metaSNV
 
-- **Coverage estimation :**
+export PATH=$metaSNV_dir:$PATH
 
-````bash
-metaSNV.py "${OUT}" "${SAMPLES}" "${FASTA}" --threads 8 --n_splits 40 --db_ann "${GENE_CLEAN}" --print-commands > cov.jobs
-# Submit the command lines :
-jnum=$(grep -c "." cov.jobs) # Store the number of jobs
-/nfs/home/ssunagaw/bork.bin/job.creator.pl 1 cov.jobs # Create a file per job
-qsub -sync y -V -t 1-$jnum -pe smp 1 /nfs/home/ssunagaw/bork.bin/run.array.sh # Submit the array 
-````
+######################
+# DEFINING VARIABLES #
+######################
 
-- **Variant calling :**
+# Input Files
+SAMPLES=../../DATA/tara.75.motu.samples
 
-````bash
-metaSNV.py "${OUT}" "${SAMPLES}" "${FASTA}" --threads 8 --n_splits 40 --db_ann "${GENE_CLEAN}" --print-commands | grep 'samtools mpileup' > snp.jobs
-# Submit the command lines :
-jnum=$(grep -c "." snp.jobs) # Store the number of jobs
-/nfs/home/ssunagaw/bork.bin/job.creator.pl 1 snp.jobs # Create a file per job
-qsub -sync y -V -t 1-$jnum -pe smp 1 /nfs/home/ssunagaw/bork.bin/run.array.sh # Submit the array
-````
+# Output Directory
+OUT=../../DATA/metaSNV_res/tara.75.motu.metasnv # use "output" not "output/"
 
-### 2. Filtering :
-````bash
-python metaSNV_filtering.py --help
-````
+# DATABASE
+# Fasta file
+FASTA=/nfs/home/paolil/DEV_METASNV/metaSNV/db/mOTUs/mOTU.v2b.centroids.reformatted.padded
+# Genes annotation
+GENE_CLEAN=/nfs/home/paolil/DEV_METASNV/metaSNV/db/mOTUs/mOTU.v2b.centroids.reformatted.padded.annotations
 
-### 3. [Optional] Filtering datasets :
-When working on MetaG and MetaT
-````bash
-python metaSNV_filtomics.py --help
-````
+# THREADS
+threads=16
 
-### 4. [Optional] Extract universal genes only :
-````bash
-python metaSNV_universal.py --help
-````
+###########################################
+echo -e "\n\n*************************\n\n"
+echo "1. COVERAGE COMPUTATION"
+echo -e "\n\n*************************\n\n"
+###########################################
 
-### 5. Compute descriptive statistics :
-````bash
-python metaSNV_stats.py --help
-````
+#metaSNV.py "${OUT}" "${SAMPLES}" "${FASTA}" --threads $threads --n_splits $threads --db_ann "${GENE_CLEAN}" --print-commands > cov.jobs 
 
-### 6. Distance computation :
-````bash
-python metaSNV_DistDiv.py --help
-````
+# JOB PARRALELLISATION
+#jnum=$(grep -c "." cov.jobs) # Store the number of jobs
+#/nfs/home/ssunagaw/bork.bin/job.creator.pl 1 cov.jobs # Create a file per job
+#qsub -sync y -V -t 1-$jnum -pe smp 1 /nfs/home/ssunagaw/bork.bin/run.array.sh # Submit the array
 
-### 7. Compute pnps values :
-````bash
-python metaSNV_pnps.py --help
-````
+###########################################
+echo -e "\n\n*************************\n\n"
+echo "2. SNV CALLING"
+echo -e "\n\n*************************\n\n"
+###########################################
 
+# Repeat command :
+
+#metaSNV.py "${OUT}" "${SAMPLES}" "${FASTA}" --threads $threads --n_splits $threads --db_ann "${GENE_CLEAN}" --print-commands | grep 'samtools mpileup' > snp.jobs
+
+# JOB PARRALELLISATION
+#jnum=$(grep -c "." snp.jobs) # Store the number of jobs
+#/nfs/home/ssunagaw/bork.bin/job.creator.pl 1 snp.jobs # Create a file per job
+#qsub -sync y -V -t 1-$jnum -pe smp 1 /nfs/home/ssunagaw/bork.bin/run.array.sh # Submit the array
+
+###########################################
+echo -e "\n\n*************************\n\n"
+echo "3. POST PROCESSING"
+echo -e "\n\n*************************\n\n"
+###########################################
+
+# Filtering :
+python ~/DEV_METASNV/metaSNV_Filtering_2.0.py "${OUT}" -m 20 -d 10 -b 80 -p 0.9 --n_threads $threads
+
+# Remove Padding :
+/nfs/home/paolil/mOTUS_Paper/DATA/motus.remove.padded.sh $OUT/filtered-m20-d10-b80-p0.9/pop
+
+# Compute distances :
+python ~/DEV_METASNV/metaSNV_DistDiv.py --filt $OUT/filtered-m20-d10-b80-p0.9 --dist --n_threads $threads
