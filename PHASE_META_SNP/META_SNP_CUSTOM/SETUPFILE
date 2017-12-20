@@ -1,8 +1,0 @@
-# Required Variables for metaSNP compilation
-SAMTOOLS="/usr/local/bin/samtools-1.3.1/"
-HTSLIB="/usr/local/bin/samtools-1.3.1/htslib-1.3.1/"
-BOOST="/science/paolil/boost_1_63_0"
-#SAMTOOLS="/nfs/gram.ethz.ch/biol_micro_unix_soft/soft_stack/soft/apps/SAMtools/1.3.1-foss-2015b/bin/samtools"
-#HTSLIB=""
-#BOOST="/nfs/gram.ethz.ch/biol_micro_unix_soft/soft_stack/soft/apps/Boost/1.61.0-foss-2015b-Python-2.7.12"
-#BOOST="/g/bork8/costea/boost_1_53_0"
