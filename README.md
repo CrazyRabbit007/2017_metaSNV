@@ -28,8 +28,10 @@ Identify variable genomic positions from aligned metagenomic data (bamfiles), de
     - SETUPFILE
     - EXAMPLE/
     - getRefDB.sh
+    
 2. **Code edits** : 
     - TO IDENTIFY
+    
 3. **Additional files** : 
     - metaSNV_Filtering_2.0.py : Parallelized filtering step
     - metaSNV_DistDiv.py : Computes pairwise distances, nucleotide diversity and FST
@@ -77,12 +79,12 @@ echo "1. COVERAGE COMPUTATION"
 echo -e "\n\n*************************\n\n"
 ###########################################
 
-#metaSNV.py "${OUT}" "${SAMPLES}" "${FASTA}" --threads $threads --n_splits $threads --db_ann "${GENE_CLEAN}" --print-commands > cov.jobs 
+metaSNV.py "${OUT}" "${SAMPLES}" "${FASTA}" --threads $threads --n_splits $threads --db_ann "${GENE_CLEAN}" --print-commands > cov.jobs 
 
 # JOB PARRALELLISATION
-#jnum=$(grep -c "." cov.jobs) # Store the number of jobs
-#/nfs/home/ssunagaw/bork.bin/job.creator.pl 1 cov.jobs # Create a file per job
-#qsub -sync y -V -t 1-$jnum -pe smp 1 /nfs/home/ssunagaw/bork.bin/run.array.sh # Submit the array
+jnum=$(grep -c "." cov.jobs) # Store the number of jobs
+/nfs/home/ssunagaw/bork.bin/job.creator.pl 1 cov.jobs # Create a file per job
+qsub -sync y -V -t 1-$jnum -pe smp 1 /nfs/home/ssunagaw/bork.bin/run.array.sh # Submit the array
 
 ###########################################
 echo -e "\n\n*************************\n\n"
@@ -92,12 +94,12 @@ echo -e "\n\n*************************\n\n"
 
 # Repeat command :
 
-#metaSNV.py "${OUT}" "${SAMPLES}" "${FASTA}" --threads $threads --n_splits $threads --db_ann "${GENE_CLEAN}" --print-commands | grep 'samtools mpileup' > snp.jobs
+metaSNV.py "${OUT}" "${SAMPLES}" "${FASTA}" --threads $threads --n_splits $threads --db_ann "${GENE_CLEAN}" --print-commands | grep 'samtools mpileup' > snp.jobs
 
 # JOB PARRALELLISATION
-#jnum=$(grep -c "." snp.jobs) # Store the number of jobs
-#/nfs/home/ssunagaw/bork.bin/job.creator.pl 1 snp.jobs # Create a file per job
-#qsub -sync y -V -t 1-$jnum -pe smp 1 /nfs/home/ssunagaw/bork.bin/run.array.sh # Submit the array
+jnum=$(grep -c "." snp.jobs) # Store the number of jobs
+/nfs/home/ssunagaw/bork.bin/job.creator.pl 1 snp.jobs # Create a file per job
+qsub -sync y -V -t 1-$jnum -pe smp 1 /nfs/home/ssunagaw/bork.bin/run.array.sh # Submit the array
 
 ###########################################
 echo -e "\n\n*************************\n\n"
