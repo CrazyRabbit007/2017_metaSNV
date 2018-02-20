@@ -21,9 +21,9 @@
     
 2. **Code edits** : 
     - metaSNV.py :
-![alt text](https://github.com/LucasPaoli/2017_metaSNV/blob/master/Capture%20d%E2%80%99e%CC%81cran%202017-12-20%20a%CC%80%2019.04.39.png "metaSNV.py edit")
+![alt text](https://github.com/LucasPaoli/2017_metaSNV/blob/master/figures/Code_changes.2.png "metaSNV.py edit")
     - collapse_coverages.py :
-![alt text](https://github.com/LucasPaoli/2017_metaSNV/blob/master/Capture%20d%E2%80%99e%CC%81cran%202017-12-20%20a%CC%80%2019.04.29.png "collapse_coverages.py edit")
+![alt text](https://github.com/LucasPaoli/2017_metaSNV/blob/master/figures/Code_changes.1.png "collapse_coverages.py edit")
 
     
 3. **Additional files** : 
@@ -31,6 +31,11 @@
     - metaSNV_DistDiv.py : Computes pairwise distances, nucleotide diversity and FST
     - motus.remove.padded.sh : Removes padded regions from filtered files
     - match.motu.freeze.ids.sh : Produces a map between mOTUs ids and freeze ids
+
+4. **Running the pipeline** : 
+    - ![alt text](https://github.com/LucasPaoli/2017_metaSNV/blob/master/runs "Scripts") : ![alt text](https://github.com/LucasPaoli/2017_metaSNV/blob/master/runs/hmp.motus.sh "Example for HMP/mOTUs")
+    - HMP outcome :
+
 
 ## Example script :
 ```
