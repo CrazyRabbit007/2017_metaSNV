@@ -33,8 +33,9 @@
     - match.motu.freeze.ids.sh : Produces a map between mOTUs ids and freeze ids
 
 4. **Running the pipeline** : 
-    - ![alt text](https://github.com/LucasPaoli/2017_metaSNV/blob/master/runs "Scripts") : ![alt text](https://github.com/LucasPaoli/2017_metaSNV/blob/master/runs/hmp.motus.sh "Example for HMP/mOTUs")
-    - HMP outcome :
+    - [Scripts](https://github.com/LucasPaoli/2017_metaSNV/blob/master/runs) : [Example for HMP/mOTUs](https://github.com/LucasPaoli/2017_metaSNV/blob/master/runs/hmp.motus.sh)
+    - Determining parameters :
+        - m, b and d : ![alt text](https://github.com/LucasPaoli/2017_metaSNV/blob/master/figures/Code_changes.1.png "collapse_coverages.py edit")
 
 
 ## Example script :
