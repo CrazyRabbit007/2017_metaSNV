@@ -1,0 +1,6 @@
+	TARA_004_DCM_0.22-1.6_G.snv.filtered.bam	TARA_007_DCM_0.22-1.6_G.snv.filtered.bam	TARA_009_DCM_0.22-1.6_G.snv.filtered.bam	TARA_067_SRF_0.22-3_G.snv.filtered.bam	TARA_102_DCM_0.22-3_G.snv.filtered.bam
+TARA_004_DCM_0.22-1.6_G.snv.filtered.bam	0.0				
+TARA_007_DCM_0.22-1.6_G.snv.filtered.bam	0.073067525863	0.0			
+TARA_009_DCM_0.22-1.6_G.snv.filtered.bam	0.0409484971127	0.0515604044731	0.0		
+TARA_067_SRF_0.22-3_G.snv.filtered.bam	0.256600824165	0.234375625909	0.229240480702	0.0	
+TARA_102_DCM_0.22-3_G.snv.filtered.bam	0.314166172727	0.305907145073	0.283583232347	0.255234788435	0.0
