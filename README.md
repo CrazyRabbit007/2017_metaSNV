@@ -42,7 +42,8 @@
 
 ## Example script :
 
-    - [Scripts](https://github.com/LucasPaoli/2017_metaSNV/blob/master/runs) : [Example for HMP/mOTUs](https://github.com/LucasPaoli/2017_metaSNV/blob/master/runs/hmp.motus.sh)
+1. [All scripits](https://github.com/LucasPaoli/2017_metaSNV/blob/master/runs)
+2. Example
 
 ```
 ###########################################
@@ -51,6 +52,7 @@ echo "0. LOADING MODULES"
 echo -e "\n\n*************************\n\n"
 ###########################################
 
+ml SAMtools
 ml HTSlib
 ml Boost
 ml Python
@@ -64,10 +66,10 @@ export PATH=$metaSNV_dir:$PATH
 ######################
 
 # Input Files
-SAMPLES=../../DATA/tara.75.motu.samples
+SAMPLES=../../DATA/tara.new.motu.samples
 
 # Output Directory
-OUT=../../DATA/metaSNV_res/tara.75.motu.metasnv # use "output" not "output/"
+OUT=../../DATA/metaSNV_res/tara.new.motu.metasnv # use "output" not "output/"
 
 # DATABASE
 # Fasta file
@@ -113,10 +115,10 @@ echo -e "\n\n*************************\n\n"
 ###########################################
 
 # Filtering :
-python ~/DEV_METASNV/metaSNV_Filtering_2.0.py "${OUT}" -m 20 -d 10 -b 80 -p 0.9 --n_threads $threads
+python ~/DEV_METASNV/metaSNV_Filtering_2.0.py "${OUT}" -m 5 -d 10 -b 60 -p 0.9 --n_threads $threads
 
 # Remove Padding :
-/nfs/home/paolil/mOTUS_Paper/DATA/motus.remove.padded.sh $OUT/filtered-m20-d10-b80-p0.9/pop
+/nfs/home/paolil/mOTUS_Paper/DATA/motus.remove.padded.sh $OUT/filtered-m5-d10-b60-p0.9/pop
 
 # Compute distances :
-python ~/DEV_METASNV/metaSNV_DistDiv.py --filt $OUT/filtered-m20-d10-b80-p0.9 --dist --n_threads $threads
+python ~/DEV_METASNV/metaSNV_DistDiv.py --filt $OUT/filtered-m5-d10-b60-p0.9 --dist --n_threads $threads
