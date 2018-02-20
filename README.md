@@ -34,15 +34,10 @@
 
 4. **Running the pipeline** : 
     - Determining parameters :
-        - **m**, **b** and **d** : 
-<object data="https://github.com/LucasPaoli/2017_metaSNV/blob/master/figures/Tara.motu.coverages.pdf" type="application/pdf" width="700px" height="700px">
-    <embed src="https://github.com/LucasPaoli/2017_metaSNV/blob/master/figures/Tara.motu.coverages.pdf">
-        This browser does not support PDFs. Please download the PDF to view it: <a href="https://github.com/LucasPaoli/2017_metaSNV/blob/master/figures/Tara.motu.coverages.pdf">Download PDF</a>.</p>
-    </embed>
-</object>
+        - **m**, **b** and **d** :  ![alt text](https://github.com/LucasPaoli/2017_metaSNV/blob/master/figures/Tara.motu.coverages.pdf "Tara/mOTUs parameters")
         - **c** and **p** : default for **c** and 90% for **p** to keep regions mostly shared between all samples.
         - Summary : 
-![alt text](https://github.com/LucasPaoli/2017_metaSNV/blob/master/figures/Parameters_summary.pdf "Parameters summary)
+![alt text](https://github.com/LucasPaoli/2017_metaSNV/blob/master/figures/Parameters_summary.pdf "Parameters summary")
 
 
 ## Example script :
