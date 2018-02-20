@@ -1,4 +1,4 @@
-# In-house customized version *under development*
+# Customized *metaSNV* for the *mOTUs* Paper
 
 **This repo is based on metaSNV :**
 - [MetaSNV Paper](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0182392)
@@ -42,7 +42,7 @@
 
 ## Example script :
 
-1. [All scripits](https://github.com/LucasPaoli/2017_metaSNV/blob/master/runs)
+1. [All scripts](https://github.com/LucasPaoli/2017_metaSNV/blob/master/runs)
 2. Example
 
 ```
