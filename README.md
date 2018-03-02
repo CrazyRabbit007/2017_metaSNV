@@ -44,6 +44,7 @@
 
 1. [All scripts](https://github.com/LucasPaoli/2017_metaSNV/blob/master/runs)
 2. Example
+3. [Results](https://github.com/LucasPaoli/2017_metaSNV/tree/master/distances)
 
 ```
 ###########################################
