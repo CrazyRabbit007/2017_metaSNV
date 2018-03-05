@@ -27,10 +27,12 @@
 
     
 3. **Additional files** : 
+    - get.annotations.py : Produces the annotation file from mOTUs_v2.dev/db_mOTU/ (with mOTU.v2b.centroids.reformatted.padded, that is what is needed for the pipeline)
     - metaSNV_Filtering_2.0.py : Parallelized filtering step
     - metaSNV_DistDiv.py : Computes pairwise distances, nucleotide diversity and FST
     - motus.remove.padded.sh : Removes padded regions from filtered files
     - match.motu.freeze.ids.sh : Produces a map between mOTUs ids and freeze ids
+
 
 4. **Running the pipeline** : 
     - Determining parameters :
@@ -43,7 +45,9 @@
 ## Example script :
 
 1. [All scripts](https://github.com/LucasPaoli/2017_metaSNV/blob/master/runs)
-2. Example
+2. Example :
+    Note that if the number of samples (+ a small offset for extra files, around 4) is higher than ```ulimit -n``` there is a need to add ```sed -i 's/^samtools/ulimit -n 3500;samtools/g' snp.jobs``` before running snp.jobs.
+    
 3. [Results](https://github.com/LucasPaoli/2017_metaSNV/tree/master/distances)
 
 ```
@@ -67,16 +71,16 @@ export PATH=$metaSNV_dir:$PATH
 ######################
 
 # Input Files
-SAMPLES=../../DATA/tara.new.motu.samples
+SAMPLES=../../DATA/tara.139.motu.samples
 
 # Output Directory
 OUT=../../DATA/metaSNV_res/tara.new.motu.metasnv # use "output" not "output/"
 
 # DATABASE
 # Fasta file
-FASTA=/nfs/home/paolil/DEV_METASNV/metaSNV/db/mOTUs/mOTU.v2b.centroids.reformatted.padded
+FASTA=/nfs/home/paolil/DEV_METASNV/metaSNV/db/mOTUs_v2/mOTU.v2b.centroids.reformatted.padded
 # Genes annotation
-GENE_CLEAN=/nfs/home/paolil/DEV_METASNV/metaSNV/db/mOTUs/mOTU.v2b.centroids.reformatted.padded.annotations
+GENE_CLEAN=/nfs/home/paolil/DEV_METASNV/metaSNV/db/mOTUs_v2/mOTU.v2b.centroids.reformatted.padded.annotations
 
 # THREADS
 threads=16
@@ -91,8 +95,8 @@ metaSNV.py "${OUT}" "${SAMPLES}" "${FASTA}" --threads $threads --n_splits $threa
 
 # JOB PARRALELLISATION
 jnum=$(grep -c "." cov.jobs) # Store the number of jobs
-/nfs/home/ssunagaw/bork.bin/job.creator.pl 1 cov.jobs # Create a file per job
-qsub -sync y -V -t 1-$jnum -pe smp 1 /nfs/home/ssunagaw/bork.bin/run.array.sh # Submit the array
+/nfs/home/ssunagaw/bin/job.creator.pl 1 cov.jobs # Create a file per job
+qsub -sync y -V -t 1-$jnum -pe smp 1 /nfs/home/ssunagaw/bin/run.array.sh # Submit the array 
 
 ###########################################
 echo -e "\n\n*************************\n\n"
@@ -106,8 +110,8 @@ metaSNV.py "${OUT}" "${SAMPLES}" "${FASTA}" --threads $threads --n_splits $threa
 
 # JOB PARRALELLISATION
 jnum=$(grep -c "." snp.jobs) # Store the number of jobs
-/nfs/home/ssunagaw/bork.bin/job.creator.pl 1 snp.jobs # Create a file per job
-qsub -sync y -V -t 1-$jnum -pe smp 1 /nfs/home/ssunagaw/bork.bin/run.array.sh # Submit the array
+/nfs/home/ssunagaw/bin/job.creator.pl 1 snp.jobs # Create a file per job
+qsub -sync y -V -t 1-$jnum -pe smp 1 /nfs/home/ssunagaw/bin/run.array.sh # Submit the array
 
 ###########################################
 echo -e "\n\n*************************\n\n"
@@ -116,10 +120,14 @@ echo -e "\n\n*************************\n\n"
 ###########################################
 
 # Filtering :
-python ~/DEV_METASNV/metaSNV_Filtering_2.0.py "${OUT}" -m 5 -d 10 -b 60 -p 0.9 --n_threads $threads
+python ~/DEV_METASNV/metaSNV_Filtering_2.0.py "${OUT}" -m 5 -d 10 -b 80 -p 0.9 --n_threads $threads
 
 # Remove Padding :
-/nfs/home/paolil/mOTUS_Paper/DATA/motus.remove.padded.sh $OUT/filtered-m5-d10-b60-p0.9/pop
+/nfs/home/paolil/mOTUS_Paper/DATA/motus.remove.padded.sh $OUT/filtered-m5-d10-b80-p0.9/pop
 
 # Compute distances :
-python ~/DEV_METASNV/metaSNV_DistDiv.py --filt $OUT/filtered-m5-d10-b60-p0.9 --dist --n_threads $threads
+python ~/DEV_METASNV/metaSNV_DistDiv.py --filt $OUT/filtered-m5-d10-b80-p0.9 --dist --n_threads $threads
+```
+
+
+
