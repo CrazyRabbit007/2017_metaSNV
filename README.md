@@ -27,7 +27,7 @@
 
     
 3. **Additional files** : 
-    - get.annotations.py : Produces the annotation file from ```mOTUs_v2.dev/db_mOTU/``` (with ```mOTU.v2b.centroids.reformatted.padded``` that is what is needed for the pipeline)
+    - get.annotations.py : Produces the annotation file from ```mOTUs_v2.dev/db_mOTU/``` (with ```mOTU.v2b.centroids.reformatted.padded``` that is what is needed for the pipeline)
     - metaSNV_Filtering_2.0.py : Parallelized filtering step
     - metaSNV_DistDiv.py : Computes pairwise distances, nucleotide diversity and FST
     - motus.remove.padded.sh : Removes padded regions from filtered files
@@ -47,8 +47,6 @@
 1. [All scripts](https://github.com/LucasPaoli/2017_metaSNV/blob/master/runs)
 2. Example : Note that if the number of samples (with a small offset for extra files - around 4) is higher than ```ulimit -n``` there is a need to add ```sed -i 's/^samtools/ulimit -n 3500;samtools/g' snp.jobs``` (3500 being an example) before running snp.jobs.
     
-3. [Results](https://github.com/LucasPaoli/2017_metaSNV/tree/master/distances)
-
 ```
 ###########################################
 echo -e "\n\n*************************\n\n"
@@ -127,6 +125,8 @@ python ~/DEV_METASNV/metaSNV_Filtering_2.0.py "${OUT}" -m 5 -d 10 -b 80 -p 0.9 -
 # Compute distances :
 python ~/DEV_METASNV/metaSNV_DistDiv.py --filt $OUT/filtered-m5-d10-b80-p0.9 --dist --n_threads $threads
 ```
+
+3. [Results](https://github.com/LucasPaoli/2017_metaSNV/tree/master/distances)
 
 
 
