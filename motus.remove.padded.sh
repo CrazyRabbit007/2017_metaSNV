@@ -1,3 +1,5 @@
+#!/bin/bash
+
 path=$1"_filt"
 mkdir $path
 
