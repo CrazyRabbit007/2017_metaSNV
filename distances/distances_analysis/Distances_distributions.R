@@ -53,6 +53,8 @@ data_compare_plot = tibble(Distances=c(data_compare$value.m,data_compare$value.f
                            Reference=rep(c('mOTUs','Freeze11'),each=nrow(data_compare)),
                            Individual=c(data_compare$Indiv.m,data_compare$Indiv.f),
                            Site=c(data_compare$SuperSite1.m,data_compare$SuperSite1.f))
+factor(data_compare_plot$Site)
+data_compare_plot$Site = factor(data_compare_plot$Site, labels = c('Oral', 'Skin', 'Stool', 'Vagina'))
 
 p1a = ggplot(data_compare_plot) + 
   ggtitle('Distributions of distances', 
@@ -69,6 +71,8 @@ data_all_plot = tibble(Distances=c(data_m$value,data_f$value),
                        Individual=c(data_m$Indiv,data_f$Indiv),
                        Species=c(data_m$Species, data_f$Species),
                        Site=c(data_m$SuperSite1,data_f$SuperSite1))
+factor(data_all_plot$Site)
+data_all_plot$Site = factor(data_all_plot$Site, labels = c('Oral', 'Skin', 'Stool', 'Vagina'))
 
 p1b = ggplot(data_all_plot) + 
   ggtitle('Distributions of distances',
@@ -81,6 +85,9 @@ p1b = ggplot(data_all_plot) +
 data_m$Type = ifelse(grepl('ref_mOTU', data_m$Species), 'Ref', 'Meta')
 table(data_m[grepl('ref_mOTU', data_m$Species), 'SuperSite1'])
 table(data_m[grepl('meta_mOTU', data_m$Species), 'SuperSite1'])
+
+factor(data_m$SuperSite1)
+data_m$SuperSite1 = factor(data_m$SuperSite1, labels = c('Oral', 'Skin', 'Stool', 'Vagina'))
 
 p1c = ggplot(data_m) + 
   ggtitle('Distributions of distances',
